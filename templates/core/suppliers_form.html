@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load form_tags %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ org.name }} - {% trans "Tedarikçi" %}</h5>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'suppliers_list' %}">{% trans "Listeye Dön" %}</a>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        {% bootstrap_field field %}
+      {% endfor %}
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">{% trans "Kaydet" %}</button>
+        <a class="btn btn-outline-secondary" href="{% url 'suppliers_list' %}">{% trans "İptal" %}</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

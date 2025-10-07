@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load form_tags %}
+{% block title %}{{ org.name }} - {% trans "Yeni Ürün" %}{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{% trans "Yeni Ürün" %}</h5>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'owner_products_list' %}">{% trans "Ürün Listesi" %}</a>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">{% bootstrap_field form.supplier %}</div>
+        <div class="col-md-4">{% bootstrap_field form.category %}</div>
+        <div class="col-md-4">{% bootstrap_field form.name %}</div>
+        <div class="col-12">{% bootstrap_field form.description %}</div>
+        <div class="col-md-3">{% bootstrap_field form.base_price %}</div>
+        <div class="col-md-3">{% bootstrap_field form.is_active %}</div>
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary" type="submit">{% trans "Kaydet" %}</button>
+        <a class="btn btn-outline-secondary" href="{% url 'owner_products_list' %}">{% trans "İptal" %}</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

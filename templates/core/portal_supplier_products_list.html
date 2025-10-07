@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">{% trans "Ürünlerim" %}</h4>
+  <a class="btn btn-primary" href="{% url 'supplier_products_new' %}">{% trans "Yeni Ürün" %}</a>
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>{% trans "Ad" %}</th>
+          <th>{% trans "Kategori" %}</th>
+          <th>{% trans "Fiyat" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.category.name }}</td>
+            <td>{{ p.base_price }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'supplier_products_edit' p.id %}">{% trans "Düzenle" %}</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'supplier_products_delete' p.id %}">{% trans "Sil" %}</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">{% trans "Kayıt yok." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

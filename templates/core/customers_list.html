@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ org.name }} - {% trans "Müşteriler" %}</h5>
+    {% if tenant_is_owner or tenant_is_admin %}
+      <a class="btn btn-sm btn-primary" href="{% url 'customers_create' %}">{% trans "Yeni Müşteri" %}</a>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-12 col-md-6">
+        <input class="form-control" type="search" name="q" placeholder="{% trans "Ara (isim/email/telefon)" %}" value="{{ q }}" />
+      </div>
+      <div class="col-12 col-md-auto d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="has_email" name="has_email" value="1" {% if has_email %}checked{% endif %} />
+          <label class="form-check-label" for="has_email">{% trans "Emaili olanlar" %}</label>
+        </div>
+      </div>
+      <div class="col-12 col-md-auto">
+        <button class="btn btn-outline-secondary" type="submit">{% trans "Ara" %}</button>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>{% trans "İsim" %}</th>
+            <th>{% trans "Email" %}</th>
+            <th>{% trans "Telefon" %}</th>
+            <th>{% trans "Oluşturuldu" %}</th>
+            {% if tenant_is_owner or tenant_is_admin %}<th class="text-end">{% trans "İşlemler" %}</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+        {% for c in customers %}
+          <tr>
+            <td class="fw-medium">{{ c.name }}</td>
+            <td><span class="text-muted">{{ c.email|default:"-" }}</span></td>
+            <td><span class="text-muted">{{ c.phone|default:"-" }}</span></td>
+            <td><small class="text-muted">{{ c.created_at|date:"Y-m-d H:i" }}</small></td>
+            {% if tenant_is_owner or tenant_is_admin %}
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'customers_edit' c.id %}">{% trans "Düzenle" %}</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'customers_delete' c.id %}">{% trans "Sil" %}</a>
+            </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">{% trans "Kayıt yok" %}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

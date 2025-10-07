@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <p>{% blocktrans %}<strong>{{ obj.name }}</strong> ürününü silmek istediğinize emin misiniz?{% endblocktrans %}</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">{% trans "Sil" %}</button>
+      <a href="{% url 'supplier_products_list' %}" class="btn btn-outline-secondary">{% trans "Vazgeç" %}</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

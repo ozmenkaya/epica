@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ org.name }} - Kategori Sil{% endblock %}
+{% block content %}
+<h1>{{ org.name }} - Kategori Sil</h1>
+<p>“{{ obj.name }}” kategorisini silmek istediğinize emin misiniz?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Evet, sil</button>
+  <a href="{% url 'categories_list' %}">Vazgeç</a>
+ </form>
+{% endblock %}

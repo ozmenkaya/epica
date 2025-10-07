@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block content %}
+<div class="card shadow-sm mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Talep #{{ ticket.id }} — {{ ticket.title }}</h5>
+    <span class="badge bg-secondary">{{ ticket.get_status_display }}</span>
+  </div>
+  <div class="card-body">
+    <div class="text-muted small mb-2">
+      <span class="me-3"><strong>Kategori:</strong> {{ ticket.category.name }}</span>
+      <span><strong>Oluşturuldu:</strong> {{ ticket.created_at|date:"Y-m-d H:i" }}</span>
+    </div>
+    {% if extra_fields %}
+      <div class="mt-2">
+        <strong>Form Yanıtları:</strong>
+        <ul class="mb-0">
+          {% for f in extra_fields %}
+            <li><span class="text-muted">{{ f.label }}:</span> {{ f.value }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if ticket.offered_price %}
+      <hr>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="me-auto">
+          <div class="text-muted small">Sunulan Fiyat</div>
+            <div class="h4 mb-0">{{ grand_total|default:ticket.offered_price }} {{ ticket.selected_quote.currency }}</div>
+          {% if ticket.offered_note %}<div class="text-muted fst-italic small mt-1">{{ ticket.offered_note }}</div>{% endif %}
+        </div>
+        <form method="post" class="d-flex flex-wrap gap-2 ms-auto">
+          {% csrf_token %}
+          <button name="action" value="accept" class="btn btn-success" {% if ticket.status != 'offered' %}disabled{% endif %}>Kabul Et</button>
+          <button name="action" value="reject" class="btn btn-outline-danger" {% if ticket.status != 'offered' %}disabled{% endif %}>Reddet</button>
+          <a href="{% url 'customer_offers_pdf' ticket.id %}" class="btn btn-outline-secondary">PDF indir</a>
+        </form>
+      </div>
+
+      {% if selected_items %}
+        <div class="card border-0 mt-3">
+          <div class="card-header bg-transparent px-0"><strong>Kalem dökümü</strong></div>
+          <div class="card-body px-0 pt-2">
+            <div class="table-responsive">
+              <table class="table table-sm table-striped align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Ürün</th>
+                    <th class="text-end">Adet</th>
+                    <th class="text-end">Birim fiyat</th>
+                    <th class="text-end">Toplam</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for it in selected_items %}
+                    <tr>
+                      <td>
+                        <div><strong>{{ it.name|default:it.description }}</strong></div>
+                        {% if it.description and it.description != it.name %}
+                          <div class="text-muted small">{{ it.description }}</div>
+                        {% endif %}
+                      </td>
+                      <td class="text-end">{{ it.quantity }}</td>
+                      <td class="text-end">{{ it.sell_unit_price }} {{ ticket.selected_quote.currency }}</td>
+                      <td class="text-end fw-bold">{{ it.sell_total }} {{ ticket.selected_quote.currency }}</td>
+                    </tr>
+                  {% endfor %}
+                  <tr>
+                    <td colspan="3" class="text-end">Ara toplam</td>
+                    <td class="text-end fw-bold">{{ items_subtotal|default:ticket.offered_price }} {{ ticket.selected_quote.currency }}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" class="text-end">Genel toplam</td>
+                    <td class="text-end fw-bold">{{ grand_total|default:ticket.offered_price }} {{ ticket.selected_quote.currency }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-warning mt-3 mb-0">Teklif işletme tarafından hazırlanıyor. Lütfen daha sonra tekrar kontrol edin.</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header"><strong>Teklife Yorum Yaz</strong></div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {% bootstrap_field form.text %}
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Yorumu Gönder</button>
+        <a class="btn btn-outline-secondary" href="{% url 'customer_offers_list' %}">Tekliflere dön</a>
+      </div>
+    </form>
+    <hr />
+    <h6>Yorumlar</h6>
+    <ul class="mb-0">
+      {% for c in comments %}
+        <li><strong>{% if c.author_customer %}{{ c.author_customer.name }}{% else %}Müşteri{% endif %}</strong> — <small class="text-muted">{{ c.created_at|date:"Y-m-d H:i" }}</small><br>{{ c.text|linebreaksbr }}</li>
+      {% empty %}
+        <li class="text-muted">Yorum yok.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ org.name }} - {% trans "Kategoriler" %}{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ org.name }} - {% trans "Kategoriler" %}</h5>
+    <a class="btn btn-sm btn-primary" href="{% url 'categories_create' %}">{% trans "Yeni Kategori" %}</a>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>{% trans "Ad" %}</th>
+            <th>{% trans "Tedarikçiler" %}</th>
+            <th class="text-end">{% trans "İşlemler" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in categories %}
+          <tr>
+            <td class="fw-medium">{{ c.name }}</td>
+            <td class="text-muted">
+              {% with names=c.suppliers.all %}
+                {% for s in names %}{% if not forloop.first %}, {% endif %}{{ s.name }}{% empty %}-{% endfor %}
+              {% endwith %}
+            </td>
+            <td class="text-end d-flex gap-2 justify-content-end">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'category_form_fields_list' c.pk %}">{% trans "Form Alanları" %}</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'category_rules_list' c.pk %}">{% trans "Kurallar" %}</a>
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'categories_edit' c.pk %}">{% trans "Düzenle" %}</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'categories_delete' c.pk %}">{% trans "Sil" %}</a>
+            </td>
+          </tr>
+          {% empty %}
+            <tr><td colspan="3" class="text-center text-muted">{% trans "Henüz kategori yok." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

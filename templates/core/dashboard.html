@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  </head>
+  <body>
+    <main class="container">
+      <h1>Dashboard</h1>
+      {% if org %}
+        <p>Aktif organizasyon: <strong>{{ org.name }}</strong> ({{ org.slug }})</p>
+        <p>
+          <a href="{% url 'customers_list' %}">Müşteriler</a>
+          ·
+          <a href="{% url 'suppliers_list' %}">Tedarikçiler</a>
+        </p>
+      {% else %}
+        <p>Hiç organizasyon seçili değil. <a href="/accounts/orgs/">Seç</a></p>
+      {% endif %}
+    </main>
+  </body>
+</html>

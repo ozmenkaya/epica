@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ org.name }} - {% trans "Ürünler" %}{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ org.name }} - {% trans "Tedarikçi Ürünleri" %}</h5>
+    <form method="get" class="d-flex gap-2 align-items-center">
+      <input type="text" class="form-control form-control-sm" name="q" placeholder="{% trans "Ara (ürün/tedarikçi)" %}" value="{{ q }}" />
+      <button class="btn btn-sm btn-outline-secondary" type="submit">{% trans "Ara" %}</button>
+      <a class="btn btn-sm btn-primary" href="{% url 'owner_products_new' %}">{% trans "Yeni Ürün" %}</a>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>{% trans "Ürün" %}</th>
+            <th>{% trans "Tedarikçi" %}</th>
+            <th>{% trans "Kategori" %}</th>
+            <th>{% trans "Liste Fiyatı" %}</th>
+            <th>{% trans "Durum" %}</th>
+            <th>{% trans "Müşteriler" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p, buyers_list in rows %}
+            <tr>
+              <td>{{ p.name }}</td>
+              <td>{{ p.supplier.name }}</td>
+              <td>{{ p.category.name }}</td>
+              <td>{% if p.base_price %}{{ p.base_price }}{% else %}-{% endif %}</td>
+              <td>{% if p.is_active %}<span class="badge text-bg-success">{% trans "Aktif" %}</span>{% else %}<span class="badge text-bg-secondary">{% trans "Pasif" %}</span>{% endif %}</td>
+              <td>
+                {% if buyers_list %}
+                  {% for name in buyers_list %}
+                    <span class="badge text-bg-light border me-1">{{ name }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-muted">{% trans "Henüz sipariş yok" %}</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">{% trans "Ürün yok" %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

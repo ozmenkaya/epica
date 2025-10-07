@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; }
+    h1 { font-size: 18px; margin: 0 0 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 6px; }
+    th { background: #f2f2f2; text-align: left; }
+    td.num { text-align: right; }
+    .meta { margin-bottom: 10px; font-size: 11px; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Teklif #{{ ticket.id }} - {{ ticket.title }}</h1>
+  <div class="meta">
+    Müşteri: {{ ticket.customer.name }}<br/>
+    Kategori: {{ ticket.category.name }}<br/>
+    Tarih: {{ ticket.created_at|date:"Y-m-d H:i" }}
+  </div>
+  {% if extra_fields %}
+  <div class="meta">
+    <strong>Form Yanıtları:</strong>
+    <ul>
+      {% for f in extra_fields %}
+        <li>{{ f.label }}: {{ f.value }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  <table>
+    <thead>
+      <tr>
+  <th>Ürün</th>
+        <th class="num">Adet</th>
+        <th class="num">Birim fiyat</th>
+        <th class="num">Toplam</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for it in items %}
+      <tr>
+        <td>
+          <div><strong>{{ it.name|default:it.description }}</strong></div>
+          {% if it.description and it.description != it.name %}
+            <div style="color:#666; font-size:10px;">{{ it.description }}</div>
+          {% endif %}
+        </td>
+        <td class="num">{{ it.quantity }}</td>
+        <td class="num">{{ it.sell_unit_price }} {{ currency }}</td>
+        <td class="num">{{ it.sell_total }} {{ currency }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="4">Kalem bulunamadı.</td>
+      </tr>
+    {% endfor %}
+      <tr>
+        <td colspan="3" class="num">Ara toplam</td>
+        <td class="num">{{ items_subtotal }} {{ currency }}</td>
+      </tr>
+      <tr>
+        <td colspan="3" class="num"><strong>Genel toplam</strong></td>
+        <td class="num"><strong>{{ grand_total }} {{ currency }}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

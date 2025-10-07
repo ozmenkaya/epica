@@ -1,0 +1,6 @@
+/* Basic layout polish */
+.table-responsive { overflow-x: auto; }
+.form-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.card + .card { margin-top: 1rem; }
+/* Make long filenames wrap */
+.wrap-anywhere { overflow-wrap: anywhere; }

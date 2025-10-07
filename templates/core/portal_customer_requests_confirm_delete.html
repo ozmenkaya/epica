@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% trans "Talep Sil" %}</h1>
+<p>{% blocktrans %}“{{ obj.title }}” başlıklı talebi silmek istediğinize emin misiniz?{% endblocktrans %}</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">{% trans "Evet, sil" %}</button>
+  <a href="{% url 'customer_requests_list' %}">{% trans "Vazgeç" %}</a>
+</form>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load form_tags %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{% trans "Yeni Talep (Müşteri Adına)" %}</h5>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'tickets_list' %}">{% trans "Listeye Dön" %}</a>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="row g-3 mb-2">
+        <div class="col-md-8">{% bootstrap_field header_form.title %}</div>
+        <div class="col-md-4">{% bootstrap_field header_form.customer %}</div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">{% trans "Alt Talepler" %}</h6>
+        <button id="add-row" class="btn btn-sm btn-primary" type="button">+ {% trans "Satır Ekle" %}</button>
+      </div>
+
+      {{ formset.management_form }}
+      <div id="rows">
+        {% for f in formset.forms %}
+          <div class="sub-row border rounded p-2 mb-2">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-4">{% bootstrap_field f.category %}</div>
+              <div class="col-6 col-md-2">{% bootstrap_field f.quantity %}</div>
+              <div class="col-12 col-md-5">{% bootstrap_field f.description %}</div>
+              <div class="col-6 col-md-1 d-flex align-items-end justify-content-md-end">
+                {% if formset.can_delete %}
+                  <button type="button" class="btn btn-outline-danger btn-sm remove-row">{% trans "Sil" %}</button>
+                  {% if f.DELETE %}<span class="d-none">{% bootstrap_field f.DELETE %}</span>{% endif %}
+                {% endif %}
+              </div>
+              <div class="col-12"><div class="dyn-fields mt-2"></div></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <template id="row-template">
+        <div class="sub-row border rounded p-2 mb-2">
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-4">
+              <label class="form-label" for="id_form-__prefix__-category">{% trans "Kategori" %}</label>
+              <select name="form-__prefix__-category" class="form-select" id="id_form-__prefix__-category">
+                {% for c in org.categories.all %}
+                  <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="id_form-__prefix__-quantity">{% trans "Adet" %}</label>
+              <input type="number" name="form-__prefix__-quantity" class="form-control" min="1" value="1" id="id_form-__prefix__-quantity" />
+            </div>
+            <div class="col-12 col-md-5">
+              <label class="form-label" for="id_form-__prefix__-description">{% trans "Açıklama" %}</label>
+              <textarea name="form-__prefix__-description" class="form-control" rows="2" id="id_form-__prefix__-description"></textarea>
+            </div>
+            <div class="col-6 col-md-1 d-flex align-items-end justify-content-md-end">
+              <button type="button" class="btn btn-outline-danger btn-sm remove-row">{% trans "Sil" %}</button>
+              <input type="checkbox" name="form-__prefix__-DELETE" id="id_form-__prefix__-DELETE" class="d-none">
+            </div>
+            <div class="col-12"><div class="dyn-fields mt-2"></div></div>
+          </div>
+        </div>
+      </template>
+
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary" type="submit">{% trans "Gönder" %}</button>
+        <a class="btn btn-outline-secondary" href="{% url 'tickets_list' %}">{% trans "İptal" %}</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{ cat_fields|json_script:"catfields-data" }}
+{{ dynamic_prefill|json_script:"dynprefill-data" }}
+{{ dynamic_errors|json_script:"dynerrors-data" }}
+
+<script>
+  (function() {
+  const catFieldSpecs = JSON.parse(document.getElementById('catfields-data').textContent || '{}');
+  const dynPrefill = JSON.parse(document.getElementById('dynprefill-data')?.textContent || '{}');
+  const dynErrors = JSON.parse(document.getElementById('dynerrors-data')?.textContent || '{}');
+    const addBtn = document.getElementById('add-row');
+    const rows = document.getElementById('rows');
+    const tmpl = document.getElementById('row-template');
+    const totalEl = document.getElementById('id_form-TOTAL_FORMS');
+    function wireRemove(btn, delInput) {
+      btn.addEventListener('click', function() {
+        const row = this.closest('.sub-row');
+        const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (del) del.checked = true;
+        row.style.display = 'none';
+      });
+    }
+    document.querySelectorAll('.remove-row').forEach(btn => {
+      wireRemove(btn);
+    });
+    function renderDynamicFields(rowEl) {
+      const catSel = rowEl.querySelector('select[id$="-category"]');
+      const target = rowEl.querySelector('.dyn-fields');
+      function draw() {
+        if (!catSel || !target) return;
+        const cid = catSel.value;
+        const prefix = (catSel.id || '').replace('id_', '').replace('-category','');
+        const fields = catFieldSpecs[cid] || [];
+        // Render as inline responsive fields (wrap to a second line if needed)
+        let html = '<div class="row g-2">';
+        const prefill = dynPrefill[prefix] || {};
+        const errors = dynErrors[prefix] || {};
+        fields.forEach(f => {
+          const name = `${prefix}-extra-${f.name}`;
+          html += '<div class="col-12 col-md-6">';
+          if (f.type === 'select') {
+            html += `<label class="form-label">${f.label}${f.required ? ' *' : ''}</label>`;
+            const isInvalid = errors[f.name] ? ' is-invalid' : '';
+            html += `<select name="${name}" class="form-select${isInvalid}">`;
+            html += `<option value="">{% trans "Seçiniz" %}</option>`;
+            (f.options || []).forEach(opt => {
+              const sel = String(opt) === String(prefill[f.name] || '') ? ' selected' : '';
+              html += `<option value="${opt}"${sel}>${opt}</option>`;
+            });
+            html += `</select>`;
+            if (errors[f.name]) html += `<div class="invalid-feedback d-block">${errors[f.name]}</div>`;
+            if (f.help) html += `<div class="form-text">${f.help}</div>`;
+          } else {
+            html += `<label class="form-label">${f.label}${f.required ? ' *' : ''}</label>`;
+            const isInvalid = errors[f.name] ? ' is-invalid' : '';
+            const val = (prefill[f.name] || '').replaceAll('"','&quot;');
+            html += `<input type="text" name="${name}" class="form-control${isInvalid}" placeholder="${f.help || f.label}" value="${val}" />`;
+            if (errors[f.name]) html += `<div class="invalid-feedback d-block">${errors[f.name]}</div>`;
+            if (f.help) html += `<div class="form-text">${f.help}</div>`;
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+        target.innerHTML = html;
+      }
+      if (catSel) {
+        catSel.addEventListener('change', draw);
+        draw();
+      }
+    }
+    document.querySelectorAll('.sub-row').forEach(renderDynamicFields);
+    addBtn.addEventListener('click', function() {
+      const idx = parseInt(totalEl.value, 10);
+      const html = tmpl.innerHTML.replaceAll('__prefix__', idx);
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html.trim();
+      const node = tmp.firstChild;
+      rows.appendChild(node);
+      totalEl.value = idx + 1;
+      const removeBtn = node.querySelector('.remove-row');
+      wireRemove(removeBtn);
+      renderDynamicFields(node);
+    });
+  })();
+  </script>
+{% endblock %}

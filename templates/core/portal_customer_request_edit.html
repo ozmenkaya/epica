@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Talebi Düzenle</h5>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'customer_requests_list' %}">Listeye Dön</a>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% bootstrap_field form.category %}
+      {% bootstrap_field form.desired_quantity %}
+      {% bootstrap_field form.title %}
+      {% bootstrap_field form.description %}
+      <div class="mt-2" id="dyn-fields"></div>
+      <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary" type="submit">Kaydet</button>
+        <a class="btn btn-outline-secondary" href="{% url 'customer_requests_list' %}">İptal</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+(function(){
+  const catFieldSpecs = JSON.parse(document.getElementById('catfields-data')?.textContent || '{}');
+  const fieldValues = JSON.parse(document.getElementById('extravalues-data')?.textContent || '{}');
+  const fieldErrors = JSON.parse(document.getElementById('dynediterrors-data')?.textContent || '{}');
+  const catSel = document.getElementById('id_category');
+  const target = document.getElementById('dyn-fields');
+  function draw(){
+    if (!catSel || !target) return;
+    const cid = catSel.value;
+    const fields = catFieldSpecs[cid] || [];
+    let html = '<div class="row g-2">';
+    fields.forEach(f => {
+      const val = fieldValues[f.name] || '';
+      const err = fieldErrors[f.name];
+      html += '<div class="col-12 col-md-6">';
+      if (f.type === 'select'){
+        html += `<label class="form-label">${f.label}${f.required ? ' *' : ''}</label>`;
+        html += `<select name="extra-${f.name}" class="form-select${err ? ' is-invalid' : ''}">`;
+        html += `<option value="">Seçiniz</option>`;
+        (f.options || []).forEach(opt => {
+          const sel = (String(opt) === String(val)) ? ' selected' : '';
+          html += `<option value="${opt}"${sel}>${opt}</option>`;
+        });
+        html += `</select>`;
+        if (err) html += `<div class="invalid-feedback d-block">${err}</div>`;
+        if (f.help) html += `<div class="form-text">${f.help}</div>`;
+      } else {
+        html += `<label class="form-label">${f.label}${f.required ? ' *' : ''}</label>`;
+        const escVal = String(val).replaceAll('"','&quot;');
+        html += `<input type="text" name="extra-${f.name}" class="form-control${err ? ' is-invalid' : ''}" value="${escVal}" placeholder="${f.help || f.label}" />`;
+        if (err) html += `<div class="invalid-feedback d-block">${err}</div>`;
+        if (f.help) html += `<div class="form-text">${f.help}</div>`;
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    target.innerHTML = html;
+  }
+  if (catSel){
+    catSel.addEventListener('change', draw);
+    draw();
+  }
+})();
+</script>
+{{ cat_fields|json_script:"catfields-data" }}
+{{ extra_values|json_script:"extravalues-data" }}
+{{ dynamic_edit_errors|json_script:"dynediterrors-data" }}
+{% endblock %}

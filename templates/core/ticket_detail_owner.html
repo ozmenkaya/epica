@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load form_tags %}
+{% block title %}{% trans "Talep" %} #{{ ticket.id }} - {% trans "Teklifler" %}{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-4 col-xl-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title mb-2">{% trans "Talep" %} #{{ ticket.id }} - {{ ticket.title }}</h5>
+        <div class="row g-2 text-muted">
+          <div class="col-12 col-md-auto"><strong>{% trans "Kategori" %}:</strong> {{ ticket.category.name }}</div>
+          <div class="col-12 col-md-auto"><strong>{% trans "Müşteri" %}:</strong> {{ ticket.customer.name }}</div>
+          <div class="col-12 col-md-auto"><strong>{% trans "Durum" %}:</strong> {{ ticket.get_status_display }}</div>
+        </div>
+        {% if extra_fields %}
+        <div class="mt-2">
+          <strong>{% trans "Form Yanıtları" %}:</strong>
+          <ul class="mb-0">
+            {% for f in extra_fields %}
+              <li><span class="text-muted">{{ f.label }}:</span> {{ f.value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-header"><strong>{% trans "Tedarikçi Teklifleri" %}</strong></div>
+      <div class="card-body">
+        <ul class="mb-0">
+          {% for q in quotes %}
+            <li>
+              <strong>{{ q.supplier.name }}</strong> → {{ q.amount }} {{ q.currency }} {% if ticket.selected_quote_id == q.id %}<em class="text-success">({% trans "seçili" %})</em>{% endif %}
+              {% if q.note %}<div><small class="text-muted">{{ q.note|linebreaksbr }}</small></div>{% endif %}
+              {% if q.items.all %}
+                <div class="mt-1">
+                  <small class="text-muted">{% trans "Kalemler" %}:</small>
+                  <ul>
+                    {% for it in q.items.all %}
+                      <li>{{ it.description }} — {{ it.quantity }} x {{ it.unit_price }} = {{ it.line_total }} {{ q.currency }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li class="text-muted">{% trans "Henüz teklif yok." %}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>{% trans "Müşteri Yorumları" %}</strong></div>
+      <div class="card-body">
+        {% if comments %}
+          <ul class="list-unstyled mb-0">
+            {% for c in comments %}
+              <li class="mb-2">
+                <div>
+                  <small class="text-muted">{{ c.created_at|date:"Y-m-d H:i" }} — {% if c.author_customer %}{{ c.author_customer.name }}{% else %}{% trans "Anonim" %}{% endif %}{% if c.quote %} ({% trans "Teklif" %} #{{ c.quote.id }}){% endif %}</small>
+                </div>
+                <div>{{ c.text|linebreaksbr }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">{% trans "Yorum yok." %}</div>
+        {% endif %}
+      </div>
+      <div class="card-footer">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'offers_list' %}">{% trans "Teklifli Taleplere Dön" %}</a>
+      </div>
+  </div>
+  </div> <!-- /left column -->
+  <div class="col-lg-8 col-xl-8">
+    <div class="card shadow-sm position-sticky" style="top:1rem;">
+      <div class="card-header"><strong>{% trans "Müşteriye Sunulacak Fiyat" %}</strong></div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% bootstrap_field form.selected_quote %}
+          <div id="analysis-box" class="alert alert-info py-2 small" style="display:none"></div>
+          <div class="border rounded p-2 mb-3">
+            <h6>{% trans "Kalem Bazlı Yüzde Kar" %}</h6>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0" id="items-table">
+                <thead>
+                  <tr>
+                    <th>{% trans "Açıklama" %}</th>
+                    <th class="text-end">{% trans "Tedarikçi Tutarı" %}</th>
+                    <th style="width:110px" class="text-end">% {% trans "Kar" %}</th>
+                    <th class="text-end">{% trans "Kar (₺)" %}</th>
+                    <th class="text-end">{% trans "Satış Tutarı" %}</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                  <tr class="fw-bold">
+                    <td class="text-end" colspan="4">{% trans "Toplam Satış" %}</td>
+                    <td class="text-end" id="grand-total">0.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          {% bootstrap_field form.offered_note %}
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">{% trans "Teklifi Seç ve Kaydet" %}</button>
+            <a class="btn btn-outline-secondary" href="{% url 'tickets_list' %}">{% trans "Geri" %}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ quotes_data|json_script:"quotes-data" }}
+{{ analysis_base|json_script:"analysis-base" }}
+<script>
+  (function(){
+    function loadQuoteItems(quoteId){
+      const data = JSON.parse(document.getElementById('quotes-data').textContent);
+      const q = data.find(x=> String(x.id) === String(quoteId));
+      if(!q){ return; }
+      // Build tbody
+      const tbody = document.querySelector('#items-table tbody');
+      if(!tbody){ return; }
+      tbody.innerHTML = '';
+      q.items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-line-total', it.line_total);
+        tr.innerHTML = `
+          <td>${it.description}<br><small class="text-muted">${it.quantity} x ${it.unit_price}</small></td>
+          <td class="text-end supplier-total">${it.line_total}</td>
+          <td class="text-end"><input type="number" step="0.01" min="0" name="markup_pct_${it.id}" value="${it.prefill_pct || ''}" class="form-control form-control-sm text-end markup-pct-input" placeholder="%" /></td>
+          <td class="text-end markup-abs">0.00</td>
+          <td class="text-end sell-total">0.00</td>`;
+        tbody.appendChild(tr);
+      });
+      recalc();
+      renderAnalysis(q);
+    }
+    function renderAnalysis(selected){
+      const el = document.getElementById('analysis-box');
+      if(!el) return;
+      const base = JSON.parse(document.getElementById('analysis-base').textContent || '""');
+      let extra = '';
+      if(selected && selected.items && selected.items.length){
+        const avgUnit = selected.items.reduce((s,it)=> s + (parseFloat(it.line_total)||0),0) / selected.items.length;
+        extra = ` {% trans "Seçilen tedarikçi" %}: ${selected.supplier}. {% trans "Ortalama kalem tutarı" %}: ${avgUnit.toFixed(2)}.`;
+      }
+      const text = (base + extra).trim();
+      if(text){ el.style.display='block'; el.textContent = text; } else { el.style.display='none'; }
+    }
+    function fmt(v){
+      try { return (parseFloat(v)||0).toFixed(2); } catch(e){ return '0.00'; }
+    }
+    function recalc(){
+      var grand = 0.0;
+      document.querySelectorAll('#items-table tbody tr').forEach(function(tr){
+        var base = parseFloat(tr.getAttribute('data-line-total')) || 0;
+        var pctInput = tr.querySelector('.markup-pct-input');
+        var pct = parseFloat(pctInput && pctInput.value) || 0;
+        var abs = base * pct / 100.0;
+        var sell = base + abs;
+        tr.querySelector('.markup-abs').textContent = fmt(abs);
+        tr.querySelector('.sell-total').textContent = fmt(sell);
+        grand += sell;
+      });
+      var g = document.getElementById('grand-total'); if(g) g.textContent = fmt(grand);
+    }
+    document.addEventListener('input', function(e){ if(e.target.classList.contains('markup-pct-input')) recalc(); });
+    document.addEventListener('DOMContentLoaded', function(){
+      // If quote select exists, hook change
+      var select = document.getElementById('id_selected_quote');
+      if(select){
+        select.addEventListener('change', function(){ loadQuoteItems(this.value); });
+        // initial
+        if(select.value){ loadQuoteItems(select.value); }
+      }
+      recalc();
+    });
+  })();
+ </script>
+{% endblock %}

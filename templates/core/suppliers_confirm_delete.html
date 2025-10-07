@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{{ org.name }} - {% trans "Tedarikçi Sil" %}</h1>
+<p>{% blocktrans %}<strong>{{ obj.name }}</strong> adlı tedarikçiyi silmek üzeresiniz. Emin misiniz?{% endblocktrans %}</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">{% trans "Evet, sil" %}</button>
+  <a href="{% url 'suppliers_list' %}">{% trans "Vazgeç" %}</a>
+</form>
+{% endblock %}

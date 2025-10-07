@@ -1,0 +1,77 @@
+{% load i18n %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'tr' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Epica{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/static/app.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+  <a class="navbar-brand" href="/">Epica</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav" aria-controls="topnav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="topnav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% if request.user.is_authenticated %}
+              {% if request.user.customer_profile or request.user.supplier_profile %}
+                {% if request.user.customer_profile %}
+                  <li class="nav-item"><a class="nav-link" href="/portal/customer/">{% trans "Müşteri Portalım" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'customer_requests_list' %}">{% trans "Taleplerim" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'customer_offers_list' %}">{% trans "Tekliflerim" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'customer_orders_list' %}">{% trans "Siparişlerim" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'customer_products_list' %}">{% trans "Ürünlerim" %}</a></li>
+                {% endif %}
+                {% if request.user.supplier_profile %}
+                  <li class="nav-item"><a class="nav-link" href="/portal/supplier/">{% trans "Tedarikçi Portalım" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'supplier_requests_list' %}">{% trans "Taleplerim" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'supplier_quotes_list' %}">{% trans "Tekliflerim" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'supplier_orders_list' %}">{% trans "Siparişler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/portal/supplier/products/">{% trans "Ürünlerim" %}</a></li>
+                {% endif %}
+              {% else %}
+                <li class="nav-item"><a class="nav-link" href="/accounts/orgs/">{% trans "Organizasyonlar" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="/dashboard/">{% trans "Dashboard" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="/customers/">{% trans "Müşteriler" %}</a></li>
+                {% if tenant_is_owner %}
+                  <li class="nav-item"><a class="nav-link" href="/categories/">{% trans "Kategoriler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/tickets/">{% trans "Talepler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/offers/">{% trans "Teklifler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/products/">{% trans "Ürünler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="/orders/">{% trans "Siparişler" %}</a></li>
+                {% endif %}
+                <li class="nav-item"><a class="nav-link" href="/suppliers/">{% trans "Tedarikçiler" %}</a></li>
+              {% endif %}
+            {% endif %}
+          </ul>
+          <ul class="navbar-nav ms-auto align-items-center">
+            {% if request.user.is_authenticated %}
+              <li class="nav-item"><a class="nav-link" href="/accounts/logout/">{% trans "Çıkış" %}</a></li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="/accounts/login/">{% trans "Giriş" %}</a></li>
+            {% endif %}
+            <li class="nav-item">
+              <form action="/i18n/setlang/" method="post" class="d-flex ms-2">
+                {% csrf_token %}
+                <select name="language" class="form-select form-select-sm" onchange="this.form.submit()">
+                  <option value="tr" {% if LANGUAGE_CODE|slice:":2" == 'tr' %}selected{% endif %}>Türkçe</option>
+                  <option value="en" {% if LANGUAGE_CODE|slice:":2" == 'en' %}selected{% endif %}>English</option>
+                </select>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <main class="container my-4">
+      {% block breadcrumbs %}{% endblock %}
+      <div class="mb-3">{% include "_messages.html" %}</div>
+      {% block content %}{% endblock %}
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </body>
+</html>

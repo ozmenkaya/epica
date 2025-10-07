@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{% trans "Bana Atanan Talepler" %}</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>{% trans "Başlık" %}</th>
+            <th>{% trans "Kategori" %}</th>
+            <th>{% trans "Durum" %}</th>
+            <th>{% trans "Oluşturuldu" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for t in tickets %}
+          <tr>
+            <td class="text-muted">#{{ t.id }}</td>
+            <td><a href="{% url 'supplier_requests_detail' t.pk %}">{{ t.title }}</a></td>
+            <td>{{ t.category.name }}</td>
+            <td>{{ t.get_status_display }}</td>
+            <td><small class="text-muted">{{ t.created_at|date:"Y-m-d H:i" }}</small></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">{% trans "Size atanan talep yok" %}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

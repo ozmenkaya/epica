@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">{{ ticket.title }}</h5>
+        <div class="mb-2"><strong>Kategori:</strong> {{ ticket.category.name }}</div>
+        <div class="mb-2"><strong>Durum:</strong> {{ ticket.get_status_display }}</div>
+  {% if ticket.offered_price %}
+  <div class="alert alert-info py-2">Size sunulan fiyat: <strong>{{ ticket.offered_price }} {{ ticket.selected_quote.currency }}</strong>{% if ticket.offered_note %} <span class="text-muted">- {{ ticket.offered_note }}</span>{% endif %}</div>
+  {% endif %}
+        <div class="mb-3"><strong>Açıklama:</strong><br>{{ ticket.description|linebreaksbr }}</div>
+        {% if extra_fields %}
+        <div class="mb-3">
+          <strong>Form Yanıtları:</strong>
+          <ul class="mb-0">
+            {% for f in extra_fields %}
+              <li><span class="text-muted">{{ f.label }}:</span> {{ f.value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        <div class="text-muted small">Oluşturuldu: {{ ticket.created_at|date:"Y-m-d H:i" }}</div>
+      </div>
+    </div>
+
+    {% if ticket.status == 'offered' %}
+    <div class="card shadow-sm mt-3">
+      <div class="card-body">
+        <div class="d-flex gap-2">
+          <form method="post" class="form-actions">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="accept">
+            <button type="submit" class="btn btn-success">Teklifi Kabul Et</button>
+          </form>
+          <form method="post" class="form-actions">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="btn btn-outline-danger">Teklifi Reddet</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">Ekler</h6>
+        <ul class="mb-3">
+          {% for a in ticket.attachments.all %}
+            <li class="wrap-anywhere"><a href="{{ a.file.url }}" target="_blank">{{ a.file.name|slice:"-60:" }}</a> <span class="text-muted">({{ a.uploaded_at|date:"Y-m-d H:i" }})</span></li>
+          {% empty %}
+            <li class="text-muted">Dosya yok.</li>
+          {% endfor %}
+        </ul>
+        <form method="post" enctype="multipart/form-data" class="mt-1" novalidate>
+          {% csrf_token %}
+          {% bootstrap_field form.file %}
+          <button type="submit" class="btn btn-primary">Dosya Yükle</button>
+        </form>
+        <div class="mt-2"><a class="btn btn-link p-0" href="{% url 'customer_requests_list' %}">Taleplerime dön</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h5 class="mb-0">{% trans "Tekliflerim" %}</h5>
+  <input id="offerSearch" type="search" class="form-control form-control-sm w-auto" placeholder="{% trans "Ara..." %}">
+</div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table id="offerTable" class="table table-sm table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>{% trans "Talep" %}</th>
+          <th>{% trans "Kategori" %}</th>
+          <th>{% trans "Teklif Sayısı" %}</th>
+          <th>{% trans "Durum" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+          <tr>
+            <td class="text-muted">#{{ t.id }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.category.name }}</td>
+            <td>{{ t.quotes.count }}</td>
+            <td>{{ t.get_status_display }}</td>
+            <td class="text-end"><a class="btn btn-sm btn-primary" href="{% url 'customer_offers_detail' t.id %}">{% trans "Detay" %}</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-muted">{% trans "Teklif bulunan talep yok." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+  (function(){
+    const input = document.getElementById('offerSearch');
+    const rows = () => Array.from(document.querySelectorAll('#offerTable tbody tr'));
+    function filter() {
+      const q = (input.value || '').toLowerCase();
+      rows().forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+    if (input) input.addEventListener('input', filter);
+  })();
+</script>
+{% endblock %}

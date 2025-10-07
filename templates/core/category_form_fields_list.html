@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{% trans "Kategori Form Alanları" %}: {{ category.name }}</h5>
+    <a href="{% url 'category_form_fields_new' category.id %}" class="btn btn-sm btn-primary">{% trans "Yeni Alan" %}</a>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>{% trans "Sıra" %}</th>
+            <th>{% trans "Etiket" %}</th>
+            <th>{% trans "Anahtar" %}</th>
+            <th>{% trans "Tip" %}</th>
+            <th>{% trans "Zorunlu" %}</th>
+            <th>{% trans "İşlemler" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in fields %}
+          <tr>
+            <td>{{ f.order }}</td>
+            <td>{{ f.label }}</td>
+            <td><code>{{ f.name }}</code></td>
+            <td>{{ f.get_field_type_display }}</td>
+            <td>{% if f.required %}{% trans "Evet" %}{% else %}{% trans "Hayır" %}{% endif %}</td>
+            <td>
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'category_form_fields_edit' category.id f.id %}">{% trans "Düzenle" %}</a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'category_form_fields_delete' category.id f.id %}">{% trans "Sil" %}</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted">{% trans "Alan yok" %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

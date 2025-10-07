@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load form_tags %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        {% bootstrap_field field %}
+      {% endfor %}
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">{% trans "Kaydet" %}</button>
+        <a class="btn btn-outline-secondary" href="{% url 'supplier_products_list' %}">{% trans "Geri" %}</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

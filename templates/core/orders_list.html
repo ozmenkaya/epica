@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h4 class="mb-0">{% trans "Siparişler" %}</h4>
+  <form method="get" class="d-flex" role="search" style="max-width:400px;">
+    <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="{% trans "Ara: talep, müşteri, tedarikçi" %}">
+  </form>
+  </div>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{% trans "Talep" %}</th>
+          <th>{% trans "Müşteri" %}</th>
+          <th>{% trans "Tedarikçi" %}</th>
+          <th>{% trans "Durum" %}</th>
+          <th>{% trans "Toplam" %}</th>
+          <th>{% trans "Tarih" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+          <tr>
+            <td>{{ o.id }}</td>
+            <td>#{{ o.ticket.id }} - {{ o.ticket.title }}</td>
+            <td>{{ o.ticket.customer.name }}</td>
+            <td>
+              {% if o.supplier %}
+                {{ o.supplier.name }}
+              {% elif o.quote %}
+                {{ o.quote.supplier.name }}
+              {% else %}-{% endif %}
+            </td>
+            <td>{{ o.get_status_display }}</td>
+            <td>{{ o.total }} {{ o.currency }}</td>
+            <td>{{ o.created_at|date:"Y-m-d H:i" }}</td>
+            <td class="text-end"><a href="{% url 'order_detail' o.id %}" class="btn btn-sm btn-outline-primary">{% trans "Detay" %}</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="text-muted">{% trans "Kayıt yok." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

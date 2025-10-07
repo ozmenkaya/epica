@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h5 class="mb-0">{% trans "Siparişlerim" %}</h5>
+  <input id="orderSearch" type="search" class="form-control form-control-sm w-auto" placeholder="{% trans "Ara..." %}">
+</div>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table id="orderTable" class="table table-sm table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>{% trans "Tarih" %}</th>
+          <th>{% trans "Talep" %}</th>
+          <th>{% trans "Tedarikçi" %}</th>
+          <th>{% trans "Tutar" %}</th>
+          <th>{% trans "Durum" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="text-muted">#{{ o.id }}</td>
+          <td><small class="text-muted">{{ o.created_at|date:"Y-m-d H:i" }}</small></td>
+          <td>
+            <a href="{% url 'customer_requests_detail' o.ticket_id %}">#{{ o.ticket_id }}</a>
+          </td>
+          <td>{% if o.quote and o.quote.supplier %}{{ o.quote.supplier.name }}{% else %}-{% endif %}</td>
+          <td>{{ o.total }} {{ o.currency }}</td>
+          <td>
+            {% if o.status == 'new' %}<span class="badge text-bg-warning">{% trans "Yeni" %}</span>
+            {% elif o.status == 'processing' %}<span class="badge text-bg-info">{% trans "İşlemde" %}</span>
+            {% elif o.status == 'completed' %}<span class="badge text-bg-success">{% trans "Tamamlandı" %}</span>
+            {% elif o.status == 'cancelled' %}<span class="badge text-bg-secondary">{% trans "İptal" %}</span>
+            {% else %}{{ o.status }}{% endif %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'customer_requests_detail' o.ticket_id %}">{% trans "Görüntüle" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if not orders %}
+<div class="alert alert-light">{% trans "Henüz bir siparişiniz yok." %}</div>
+{% endif %}
+
+<script>
+  (function(){
+    const input = document.getElementById('orderSearch');
+    const rows = () => Array.from(document.querySelectorAll('#orderTable tbody tr'));
+    function filter() {
+      const q = (input.value || '').toLowerCase();
+      rows().forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+    if (input) input.addEventListener('input', filter);
+  })();
+</script>
+{% endblock %}

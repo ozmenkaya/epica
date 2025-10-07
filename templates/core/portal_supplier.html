@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% trans "Tedarikçi Portalı" %}</h1>
+<p>{% blocktrans with sname=supplier.name %}Merhaba, {{ sname }}.{% endblocktrans %}</p>
+<p>{% trans "Organizasyon" %}: {{ org.name }}</p>
+<p>{% trans "Email" %}: {{ supplier.email }}</p>
+<p>{% trans "Telefon" %}: {{ supplier.phone }}</p>
+<p>
+	<a href="{% url 'supplier_requests_list' %}">{% trans "Taleplerim" %}</a>
+</p>
+<article>
+	<header>{% trans "Açık Talep Sayısı" %}</header>
+	<h2 style="margin: 0;">{{ assigned_open_count }}</h2>
+	<footer><small>{% trans "Kategorilerinizle eşleşen açık talepler" %}</small></footer>
+</article>
+{% endblock %}

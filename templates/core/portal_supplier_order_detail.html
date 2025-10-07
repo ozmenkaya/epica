@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<h5 class="mb-3">Sipariş #{{ order.id }}</h5>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <div class="row mb-2">
+          <div class="col-6"><strong>Talep:</strong> #{{ order.ticket.id }} - {{ order.ticket.title }}</div>
+          <div class="col-6"><strong>Durum:</strong> {{ order.get_status_display }}</div>
+        </div>
+        <div class="row mb-2">
+          <div class="col-6"><strong>Oluşturuldu:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-header bg-light">Kalemler</div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Ürün/Açıklama</th>
+              <th class="text-end">Adet</th>
+              <th class="text-end">Birim Fiyat (Tedarikçi)</th>
+              <th class="text-end">Tedarikçi Tutar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in order.items.all %}
+              <tr>
+                <td>{{ it.description }}</td>
+                <td class="text-end">{{ it.quantity }}</td>
+                <td class="text-end">{{ it.supplier_unit_price }}</td>
+                <td class="text-end">{{ it.quantity|default_if_none:0|floatformat:0|add:"" }}{% comment %}placeholder{% endcomment %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-muted">Kalem yok.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm position-sticky" style="top:1rem;">
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-2">
+            <label class="form-label">Termin Tarihi</label>
+            <input type="date" name="supplier_eta" class="form-control" value="{{ order.supplier_eta|date:'Y-m-d' }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Yorum / Not</label>
+            <textarea name="supplier_note" class="form-control" rows="3" placeholder="Üretim/Kargo notu...">{{ order.supplier_note }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Kabul Et / Güncelle</button>
+          {% if order.supplier_acknowledged %}
+            <div class="form-text mt-2">Durum: Kabul edildi.</div>
+          {% endif %}
+        </form>
+        <div class="small text-muted mt-3">Bu sayfa tedarikçi görünümüdür. Müşteri bilgileri ve satış fiyatları gizlenmiştir.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

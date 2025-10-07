@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% trans "Müşteri Portalı" %}</h1>
+<p>{% blocktrans with cname=customer.name %}Merhaba, {{ cname }}.{% endblocktrans %}</p>
+<p>{% trans "Organizasyon" %}: {{ org.name }}</p>
+<p>{% trans "Email" %}: {{ customer.email }}</p>
+<p>{% trans "Telefon" %}: {{ customer.phone }}</p>
+<article>
+	<header>{% trans "Açık Talep Sayısı" %}</header>
+	<h2 style="margin: 0;">{{ open_count }}</h2>
+	<footer><small>{% trans "Durumu \"Open\" olan talepleriniz" %}</small></footer>
+</article>
+{% endblock %}

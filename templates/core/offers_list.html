@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ org.name }} - Teklifli Talepler{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ org.name }} - Teklifli Talepler</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Başlık</th>
+            <th>Kategori</th>
+            <th>Müşteri</th>
+            <th>Teklif Sayısı</th>
+            <th>Durum</th>
+            <th>Oluşturuldu</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for t in tickets %}
+          <tr>
+            <td class="text-muted">#{{ t.id }}</td>
+            <td><a href="{% url 'ticket_detail_owner' t.id %}">{{ t.title }}</a></td>
+            <td>{{ t.category.name }}</td>
+            <td>{{ t.customer.name }}</td>
+            <td>
+              {# We may not have quotes_count here, so compute via related manager length #}
+              <span class="badge text-bg-secondary">{{ t.quotes.all|length }}</span>
+            </td>
+            <td>{{ t.get_status_display }}</td>
+            <td>{{ t.created_at|date:"Y-m-d H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center text-muted">Teklifli talep yok</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

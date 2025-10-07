@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header">
+    <h5 class="mb-0">{% trans "Kuralı Sil" %}</h5>
+  </div>
+  <div class="card-body">
+    <p>{% blocktrans %}<strong>{{ obj.label }}</strong> kuralını silmek istediğinizden emin misiniz?{% endblocktrans %}</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">{% trans "Evet, Sil" %}</button>
+      <a class="btn btn-outline-secondary" href="{% url 'category_rules_list' category.id %}">{% trans "Vazgeç" %}</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
