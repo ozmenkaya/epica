@@ -1,11 +1,20 @@
-# Epica Production Deployment (Ubuntu/Nginx/Gunicorn)
+# Epica Deployment Guide
 
-This guide sets up Epica under /opt/epica with systemd (gunicorn) and nginx.
+This document outlines the steps to deploy the Epica Django application to an Ubuntu server with Nginx and Gunicorn.
 
-Prerequisites
-- Ubuntu 22.04+ with sudo
-- DNS A records for lethe.com.tr and www.lethe.com.tr pointing to the server
-- A non-root user with sudo privileges
+## Server Information
+
+- **Server IP**: 78.46.162.116
+- **Provider**: Hetzner
+- **User**: root
+- **Password**: Jc4TXw9jmjsL4XNhpTV9
+
+## Prerequisites
+
+- Ubuntu 20.04 or 22.04 server
+- Domain name pointed to server IP (optional)
+- SSH access to the server
+- sudo privileges
 
 Paths
 - Project root: /opt/epica
