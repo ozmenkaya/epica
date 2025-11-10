@@ -259,12 +259,17 @@ class CategoryForm(forms.ModelForm):
 		# Limit suppliers to current organization
 		if org is not None:
 			self.fields["suppliers"].queryset = Supplier.objects.filter(organization=org).order_by("name")
-			# Limit parent categories to current organization, excluding self
+			# Limit parent categories to current organization, excluding self and children
 			parent_qs = Category.objects.filter(organization=org).order_by("name")
 			if self.instance and self.instance.pk:
 				parent_qs = parent_qs.exclude(pk=self.instance.pk)
+				# Also exclude descendants to prevent circular references
+				children_ids = list(self.instance.children.values_list('pk', flat=True))
+				if children_ids:
+					parent_qs = parent_qs.exclude(pk__in=children_ids)
 			self.fields["parent"].queryset = parent_qs
 			self.fields["parent"].required = False
+			self.fields["parent"].empty_label = "--- Ana Kategori ---"
 
 
 @tenant_role_required([Membership.Role.OWNER])
