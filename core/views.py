@@ -43,7 +43,7 @@ def role_landing(request):
 	# 3) Supplier portal users
 	sup = getattr(request.user, "supplier_profile", None)
 	if sup is not None:
-		_set_tenant_session(request, sup.organization)
+		_set_tenant_session(request, org)
 		return redirect("supplier_portal")
 
 	# 4) Organization members -> map using role to internal app pages
@@ -685,6 +685,14 @@ def _set_tenant_session(request, org):
 	request.session["current_org"] = org.slug
 
 
+def _get_supplier_org(supplier, request):
+	"""Get organization for supplier - from session or first organization."""
+	org = getattr(request, "tenant", None)
+	if not org:
+		org = supplier.organizations.first()
+	return org
+
+
 @login_required
 def portal_home(request):
 	"""Unified portal home after login.
@@ -698,7 +706,10 @@ def portal_home(request):
 		return redirect("customer_portal")
 	sup = getattr(request.user, "supplier_profile", None)
 	if sup is not None:
-		_set_tenant_session(request, sup.organization)
+		# Get first organization for supplier (or use session if set)
+		first_org = sup.organizations.first()
+		if first_org:
+			_set_tenant_session(request, first_org)
 		return redirect("supplier_portal")
 	return redirect("role_landing")
 
@@ -718,9 +729,12 @@ def supplier_portal(request):
 	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	# Get organization from session or first organization
+	org = getattr(request, "tenant", None) or sup.organizations.first()
+	if org:
+		_set_tenant_session(request, org)
 	# Count tickets assigned to this supplier via rules (fallback to category.suppliers)
-	open_tickets = Ticket.objects.filter(organization=sup.organization, status=Ticket.Status.OPEN).select_related("category")
+	open_tickets = Ticket.objects.filter(organization=org, status=Ticket.Status.OPEN).select_related("category") if org else []
 	assigned_cnt = 0
 	for t in open_tickets:
 		try:
@@ -728,7 +742,7 @@ def supplier_portal(request):
 				assigned_cnt += 1
 		except Exception:
 			continue
-	return render(request, "core/portal_supplier.html", {"supplier": sup, "org": sup.organization, "assigned_open_count": assigned_cnt})
+	return render(request, "core/portal_supplier.html", {"supplier": sup, "org": org, "assigned_open_count": assigned_cnt})
 
 
 @login_required
@@ -736,9 +750,12 @@ def supplier_requests_list(request):
 	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	# Get organization from session or first organization
+	org = getattr(request, "tenant", None) or sup.organizations.first()
+	if org:
+		_set_tenant_session(request, org)
 	# Rule-based assignment: filter in Python since rules can't be expressed in ORM easily
-	all_tickets = Ticket.objects.filter(organization=sup.organization).select_related("category", "customer")
+	all_tickets = Ticket.objects.filter(organization=org).select_related("category", "customer") if org else []
 	tickets = []
 	for t in all_tickets:
 		try:
@@ -746,7 +763,7 @@ def supplier_requests_list(request):
 				tickets.append(t)
 		except Exception:
 			continue
-	return render(request, "core/portal_supplier_requests_list.html", {"tickets": tickets, "supplier": sup, "org": sup.organization})
+	return render(request, "core/portal_supplier_requests_list.html", {"tickets": tickets, "supplier": sup, "org": org})
 
 
 @login_required
@@ -754,9 +771,11 @@ def supplier_orders_list(request):
 	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
 	qs = (
-		Order.objects.filter(organization=sup.organization, supplier=sup)
+		Order.objects.filter(organization=org, supplier=sup)
 		.filter(status__in=[Order.Status.PROCESSING, Order.Status.COMPLETED])
 		.select_related("ticket")
 		.order_by("-created_at")
@@ -774,19 +793,21 @@ def supplier_orders_list(request):
 	except Exception:
 		for o in orders:
 			o.remaining_days = None
-	return render(request, "core/portal_supplier_orders_list.html", {"orders": orders, "supplier": sup, "org": sup.organization})
+	return render(request, "core/portal_supplier_orders_list.html", {"orders": orders, "supplier": sup, "org": org})
 
 
 @login_required
 def supplier_order_detail(request, pk: int):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
 	order = get_object_or_404(
 		Order.objects.select_related("ticket").prefetch_related("items"),
 		pk=pk,
-		organization=sup.organization,
+		organization=org,
 		supplier=sup,
 	)
 	if request.method == "POST":
@@ -809,16 +830,18 @@ def supplier_order_detail(request, pk: int):
 	return render(
 		request,
 		"core/portal_supplier_order_detail.html",
-		{"order": order, "supplier": sup, "org": sup.organization},
+		{"order": order, "supplier": sup, "org": org},
 	)
 
 
 @login_required
 def supplier_quotes_list(request):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
 	qs = (
 		Quote.objects
 		.filter(supplier=sup)
@@ -831,7 +854,7 @@ def supplier_quotes_list(request):
 	return render(
 		request,
 		"core/portal_supplier_quotes_list.html",
-		{"quotes": qs, "supplier": sup, "org": sup.organization, "q": q},
+		{"quotes": qs, "supplier": sup, "org": org, "q": q},
 	)
 
 
@@ -1763,11 +1786,13 @@ def customer_requests_detail(request, pk: int):
 
 @login_required
 def supplier_requests_detail(request, pk: int):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
-	obj = get_object_or_404(Ticket, pk=pk, organization=sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
+	obj = get_object_or_404(Ticket, pk=pk, organization=org)
 	# Authorization: ensure this supplier is assigned via rules or category fallback
 	if not obj.assigned_suppliers.filter(id=sup.id).exists():
 		return redirect("supplier_requests_list")
@@ -1843,7 +1868,7 @@ def supplier_requests_detail(request, pk: int):
 			"ticket": obj,
 			"note_form": note_form,
 			"items_formset": formset,
-			"org": sup.organization,
+			"org": org,
 			"existing": existing,
 			"extra_fields": extra_fields,
 		},
@@ -1998,61 +2023,69 @@ from django.views.decorators.http import require_http_methods
 
 @login_required
 def supplier_products_list(request):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
 	qs = SupplierProduct.objects.filter(supplier=sup, is_active=True).select_related("category")
-	return render(request, "core/portal_supplier_products_list.html", {"products": qs, "supplier": sup, "org": sup.organization})
+	return render(request, "core/portal_supplier_products_list.html", {"products": qs, "supplier": sup, "org": org})
 
 
 @login_required
 def supplier_products_new(request):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
 	if request.method == "POST":
-		form = SupplierProductForm(request.POST, organization=sup.organization, supplier=sup)
+		form = SupplierProductForm(request.POST, organization=org, supplier=sup)
 		if form.is_valid():
 			obj = form.save(commit=False)
-			obj.organization = sup.organization
+			obj.organization = org
 			obj.supplier = sup
 			obj.save()
 			return redirect("supplier_products_list")
 	else:
-		form = SupplierProductForm(organization=sup.organization, supplier=sup)
-	return render(request, "core/portal_supplier_products_form.html", {"form": form, "supplier": sup, "org": sup.organization})
+		form = SupplierProductForm(organization=org, supplier=sup)
+	return render(request, "core/portal_supplier_products_form.html", {"form": form, "supplier": sup, "org": org})
 
 
 @login_required
 def supplier_products_edit(request, pk: int):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
 	obj = get_object_or_404(SupplierProduct, pk=pk, supplier=sup)
 	if request.method == "POST":
-		form = SupplierProductForm(request.POST, instance=obj, organization=sup.organization, supplier=sup)
+		form = SupplierProductForm(request.POST, instance=obj, organization=org, supplier=sup)
 		if form.is_valid():
 			form.save()
 			return redirect("supplier_products_list")
 	else:
-		form = SupplierProductForm(instance=obj, organization=sup.organization, supplier=sup)
-	return render(request, "core/portal_supplier_products_form.html", {"form": form, "supplier": sup, "org": sup.organization})
+		form = SupplierProductForm(instance=obj, organization=org, supplier=sup)
+	return render(request, "core/portal_supplier_products_form.html", {"form": form, "supplier": sup, "org": org})
 
 
 @login_required
 def supplier_products_delete(request, pk: int):
-	sup = getattr(request.user, "supplier_profile", None)
 	if not sup:
 		return redirect("home")
-	_set_tenant_session(request, sup.organization)
+	org = _get_supplier_org(sup, request)
+	if org:
+		_set_tenant_session(request, org)
+	_set_tenant_session(request, org)
 	obj = get_object_or_404(SupplierProduct, pk=pk, supplier=sup)
 	if request.method == "POST":
 		obj.delete()
 		return redirect("supplier_products_list")
-	return render(request, "core/portal_supplier_products_confirm_delete.html", {"obj": obj, "supplier": sup, "org": sup.organization})
+	return render(request, "core/portal_supplier_products_confirm_delete.html", {"obj": obj, "supplier": sup, "org": org})
 
 
 # ---------- Owner: Orders list (runsayfası) ----------
