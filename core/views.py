@@ -320,10 +320,16 @@ def categories_create(request):
 		if form.is_valid():
 			obj = form.save(commit=False)
 			obj.organization = org
-			obj.save()
-			form.save_m2m()
-			messages.success(request, f"Kategori '{obj.name}' oluşturuldu.")
-			return redirect("categories_list")
+			try:
+				obj.save()
+				form.save_m2m()
+				messages.success(request, f"Kategori '{obj.name}' oluşturuldu.")
+				return redirect("categories_list")
+			except Exception as e:
+				if "unique" in str(e).lower() or "duplicate" in str(e).lower():
+					messages.error(request, f"Bu organizasyonda '{obj.name}' isimli kategori zaten mevcut.")
+				else:
+					messages.error(request, f"Kategori oluşturulurken hata: {str(e)}")
 		else:
 			messages.error(request, "Lütfen formu kontrol edin.")
 	else:
@@ -338,9 +344,15 @@ def categories_edit(request, pk: int):
 	if request.method == "POST":
 		form = CategoryForm(request.POST, instance=obj, organization=org)
 		if form.is_valid():
-			cat = form.save()
-			messages.success(request, f"Kategori '{cat.name}' güncellendi.")
-			return redirect("categories_list")
+			try:
+				cat = form.save()
+				messages.success(request, f"Kategori '{cat.name}' güncellendi.")
+				return redirect("categories_list")
+			except Exception as e:
+				if "unique" in str(e).lower() or "duplicate" in str(e).lower():
+					messages.error(request, f"Bu organizasyonda '{form.cleaned_data.get('name')}' isimli kategori zaten mevcut.")
+				else:
+					messages.error(request, f"Kategori güncellenirken hata: {str(e)}")
 		else:
 			messages.error(request, "Lütfen formu kontrol edin.")
 	else:
