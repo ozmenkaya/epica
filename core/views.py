@@ -171,13 +171,30 @@ class SupplierForm(forms.ModelForm):
 		fields = ["name", "email", "phone", "notes"]
 
 	def __init__(self, *args, **kwargs):
+		self.is_existing = kwargs.pop("is_existing", False)
 		instance = kwargs.get("instance")
 		super().__init__(*args, **kwargs)
 		if instance and getattr(instance, "user", None):
 			self.fields["login_username"].initial = instance.user.username
+		# Hide login fields if existing supplier
+		if self.is_existing:
+			self.fields["login_username"].widget = forms.HiddenInput()
+			self.fields["login_password1"].widget = forms.HiddenInput()
+			self.fields["login_password2"].widget = forms.HiddenInput()
+
+	def clean_email(self):
+		email = self.cleaned_data.get("email")
+		# Allow duplicate emails for existing suppliers (will be handled in view)
+		if email and not self.instance.pk:
+			# Check if email exists but don't raise error - view will handle it
+			pass
+		return email
 
 	def clean(self):
 		cleaned = super().clean()
+		# Skip password validation for existing suppliers
+		if self.is_existing:
+			return cleaned
 		p1 = cleaned.get("login_password1")
 		p2 = cleaned.get("login_password2")
 		if (p1 or p2) and p1 != p2:
@@ -438,23 +455,39 @@ def owner_products_new(request):
 @tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
 def suppliers_create(request):
 	org = getattr(request, "tenant", None)
+	existing_supplier = None
+	confirm_add = request.POST.get("confirm_add_existing")
+	
 	if request.method == "POST":
+		# Check if confirming to add existing supplier
+		if confirm_add == "yes":
+			supplier_id = request.POST.get("existing_supplier_id")
+			if supplier_id:
+				existing_supplier = Supplier.objects.filter(pk=supplier_id).first()
+				if existing_supplier:
+					if org in existing_supplier.organizations.all():
+						messages.warning(request, f"Tedarikçi '{existing_supplier.name}' zaten bu organizasyonda mevcut.")
+					else:
+						existing_supplier.organizations.add(org)
+						messages.success(request, f"Mevcut tedarikçi '{existing_supplier.name}' organizasyonunuza eklendi.")
+					return redirect("suppliers_list")
+		
 		form = SupplierForm(request.POST)
 		if form.is_valid():
 			email = form.cleaned_data.get("email")
 			# Check if supplier with this email already exists
-			existing_supplier = None
 			if email:
 				existing_supplier = Supplier.objects.filter(email=email).first()
 			
 			if existing_supplier:
-				# Add existing supplier to this organization
-				if org in existing_supplier.organizations.all():
-					messages.warning(request, f"Tedarikçi '{existing_supplier.name}' zaten bu organizasyonda mevcut.")
-				else:
-					existing_supplier.organizations.add(org)
-					messages.success(request, f"Mevcut tedarikçi '{existing_supplier.name}' organizasyonunuza eklendi.")
-				return redirect("suppliers_list")
+				# Show confirmation page
+				form = SupplierForm(request.POST, is_existing=True)
+				return render(request, "core/suppliers_form.html", {
+					"form": form, 
+					"org": org, 
+					"existing_supplier": existing_supplier,
+					"show_confirmation": True
+				})
 			
 			# Create new supplier
 			sup = form.save(commit=False)

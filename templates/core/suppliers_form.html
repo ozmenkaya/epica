@@ -8,16 +8,39 @@
     <a class="btn btn-sm btn-outline-secondary" href="{% url 'suppliers_list' %}">{% trans "Listeye Dön" %}</a>
   </div>
   <div class="card-body">
-    <form method="post" novalidate>
-      {% csrf_token %}
-      {% for field in form %}
-        {% bootstrap_field field %}
-      {% endfor %}
-      <div class="d-flex gap-2">
-        <button class="btn btn-primary" type="submit">{% trans "Kaydet" %}</button>
-        <a class="btn btn-outline-secondary" href="{% url 'suppliers_list' %}">{% trans "İptal" %}</a>
+    {% if show_confirmation %}
+      <div class="alert alert-warning">
+        <h6><i class="bi bi-exclamation-triangle"></i> Mevcut Tedarikçi Bulundu</h6>
+        <p class="mb-2">
+          <strong>{{ existing_supplier.name }}</strong> ({{ existing_supplier.email }}) isimli tedarikçi sistemde zaten kayıtlı.
+        </p>
+        <p class="mb-3">
+          Bu tedarikçiyi organizasyonunuza eklemek istiyor musunuz?
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="confirm_add_existing" value="yes">
+          <input type="hidden" name="existing_supplier_id" value="{{ existing_supplier.id }}">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-warning">
+              <i class="bi bi-plus-circle"></i> Evet, Bu Tedarikçiyi Ekle
+            </button>
+            <a href="{% url 'suppliers_list' %}" class="btn btn-outline-secondary">İptal</a>
+          </div>
+        </form>
       </div>
-    </form>
+    {% else %}
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          {% bootstrap_field field %}
+        {% endfor %}
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" type="submit">{% trans "Kaydet" %}</button>
+          <a class="btn btn-outline-secondary" href="{% url 'suppliers_list' %}">{% trans "İptal" %}</a>
+        </div>
+      </form>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
