@@ -22,9 +22,13 @@ class Customer(models.Model):
 		indexes = [
 			models.Index(fields=["organization", "name"]),
 		]
-		unique_together = (
-			("organization", "email"),
-		)
+		constraints = [
+			models.UniqueConstraint(
+				fields=["organization", "email"],
+				condition=models.Q(email__isnull=False),
+				name="unique_customer_email_per_org"
+			),
+		]
 
 	def __str__(self) -> str:
 		return f"{self.name}"
@@ -46,9 +50,13 @@ class Supplier(models.Model):
 		indexes = [
 			models.Index(fields=["organization", "name"]),
 		]
-		unique_together = (
-			("organization", "email"),
-		)
+		constraints = [
+			models.UniqueConstraint(
+				fields=["organization", "email"],
+				condition=models.Q(email__isnull=False),
+				name="unique_supplier_email_per_org"
+			),
+		]
 
 	def __str__(self) -> str:
 		return f"{self.name}"
