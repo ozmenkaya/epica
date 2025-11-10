@@ -241,7 +241,17 @@ class OwnerSupplierProductForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
 	class Meta:
 		model = Category
-		fields = ["name", "suppliers"]
+		fields = ["parent", "name", "suppliers"]
+		widgets = {
+			"parent": forms.Select(attrs={"class": "form-select"}),
+			"name": forms.TextInput(attrs={"class": "form-control"}),
+			"suppliers": forms.SelectMultiple(attrs={"class": "form-select", "size": "8"}),
+		}
+		labels = {
+			"parent": "Üst Kategori",
+			"name": "Kategori Adı",
+			"suppliers": "Tedarikçiler",
+		}
 
 	def __init__(self, *args, **kwargs):
 		org = kwargs.pop("organization", None)
@@ -249,13 +259,22 @@ class CategoryForm(forms.ModelForm):
 		# Limit suppliers to current organization
 		if org is not None:
 			self.fields["suppliers"].queryset = Supplier.objects.filter(organization=org).order_by("name")
+			# Limit parent categories to current organization, excluding self
+			parent_qs = Category.objects.filter(organization=org).order_by("name")
+			if self.instance and self.instance.pk:
+				parent_qs = parent_qs.exclude(pk=self.instance.pk)
+			self.fields["parent"].queryset = parent_qs
+			self.fields["parent"].required = False
 
 
 @tenant_role_required([Membership.Role.OWNER])
 def categories_list(request):
 	org = getattr(request, "tenant", None)
-	qs = Category.objects.filter(organization=org).prefetch_related("suppliers").order_by("name")
-	return render(request, "core/categories_list.html", {"categories": qs, "org": org})
+	# Get all categories with their relationships
+	all_categories = Category.objects.filter(organization=org).prefetch_related("suppliers", "children").order_by("name")
+	# Separate root categories (no parent) and build hierarchy
+	root_categories = [c for c in all_categories if c.parent_id is None]
+	return render(request, "core/categories_list.html", {"categories": all_categories, "root_categories": root_categories, "org": org})
 
 
 @tenant_role_required([Membership.Role.OWNER])

@@ -91,6 +91,7 @@ class SupplierProduct(models.Model):
 class Category(models.Model):
 	"""Organization-scoped category that maps to one or more Suppliers."""
 	organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="categories")
+	parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children', verbose_name="Üst Kategori")
 	name = models.CharField(max_length=200)
 	suppliers = models.ManyToManyField('Supplier', related_name='categories', blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
@@ -105,9 +106,27 @@ class Category(models.Model):
 			for sup in self.suppliers.all():
 				if sup.organization_id != self.organization_id:
 					raise ValidationError("Kategori ve tedarikçiler aynı organizasyonda olmalıdır.")
+		# Validate parent category is in same organization
+		if self.parent_id and self.organization_id:
+			if self.parent.organization_id != self.organization_id:
+				raise ValidationError("Üst kategori aynı organizasyonda olmalıdır.")
+		# Prevent circular reference
+		if self.parent_id and self.pk and self.parent_id == self.pk:
+			raise ValidationError("Kategori kendi üst kategorisi olamaz.")
 
 	def __str__(self) -> str:
+		if self.parent:
+			return f"{self.parent.name} > {self.name}"
 		return f"{self.name}"
+	
+	def get_full_path(self):
+		"""Return full category path from root to this category."""
+		path = [self.name]
+		parent = self.parent
+		while parent:
+			path.insert(0, parent.name)
+			parent = parent.parent
+		return " > ".join(path)
 
 
 class CategorySupplierRule(models.Model):
