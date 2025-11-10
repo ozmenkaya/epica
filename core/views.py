@@ -226,7 +226,7 @@ class OwnerSupplierProductForm(forms.ModelForm):
 		org = kwargs.pop("organization", None)
 		super().__init__(*args, **kwargs)
 		if org is not None:
-			self.fields["supplier"].queryset = Supplier.objects.filter(organization=org).order_by("name")
+			self.fields["supplier"].queryset = Supplier.objects.filter(organizations=org).order_by("name")
 			self.fields["category"].queryset = Category.objects.filter(organization=org).order_by("name")
 		self._organization = org
 
@@ -258,7 +258,7 @@ class CategoryForm(forms.ModelForm):
 		super().__init__(*args, **kwargs)
 		# Limit suppliers to current organization
 		if org is not None:
-			self.fields["suppliers"].queryset = Supplier.objects.filter(organization=org).order_by("name")
+			self.fields["suppliers"].queryset = Supplier.objects.filter(organizations=org).order_by("name")
 			# Limit parent categories to current organization, excluding self and children
 			parent_qs = Category.objects.filter(organization=org).order_by("name")
 			if self.instance and self.instance.pk:
@@ -367,7 +367,7 @@ def offers_list(request):
 @tenant_member_required
 def suppliers_list(request):
 	org = getattr(request, "tenant", None)
-	qs = Supplier.objects.filter(organization=org)
+	qs = Supplier.objects.filter(organizations=org)
 	q = request.GET.get("q", "").strip()
 	if q:
 		qs = qs.filter(models.Q(name__icontains=q) | models.Q(email__icontains=q) | models.Q(phone__icontains=q))
@@ -442,8 +442,8 @@ def suppliers_create(request):
 		form = SupplierForm(request.POST)
 		if form.is_valid():
 			sup = form.save(commit=False)
-			sup.organization = org
 			sup.save()
+			sup.organizations.add(org)
 			# Create login if missing; prefer owner-provided credentials
 			if not sup.user:
 				U = get_user_model()
@@ -533,7 +533,7 @@ def customers_delete(request, pk: int):
 @tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
 def suppliers_edit(request, pk: int):
 	org = getattr(request, "tenant", None)
-	obj = get_object_or_404(Supplier, pk=pk, organization=org)
+	obj = get_object_or_404(Supplier, pk=pk, organizations=org)
 	if request.method == "POST":
 		form = SupplierForm(request.POST, instance=obj)
 		if form.is_valid():
@@ -578,11 +578,16 @@ def suppliers_edit(request, pk: int):
 @tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
 def suppliers_delete(request, pk: int):
 	org = getattr(request, "tenant", None)
-	obj = get_object_or_404(Supplier, pk=pk, organization=org)
+	obj = get_object_or_404(Supplier, pk=pk, organizations=org)
 	if request.method == "POST":
 		name = obj.name
-		obj.delete()
-		messages.success(request, f"Tedarikçi '{name}' silindi.")
+		# Remove organization from supplier (or delete if last org)
+		obj.organizations.remove(org)
+		if not obj.organizations.exists():
+			obj.delete()
+			messages.success(request, f"Tedarikçi '{name}' tamamen silindi.")
+		else:
+			messages.success(request, f"Tedarikçi '{name}' bu organizasyondan kaldırıldı.")
 		return redirect("suppliers_list")
 	return render(request, "core/suppliers_confirm_delete.html", {"obj": obj, "org": org})
 
@@ -1345,7 +1350,7 @@ class CategorySupplierRuleForm(forms.ModelForm):
 		super().__init__(*args, **kwargs)
 		# Scope suppliers to organization
 		if self._organization is not None:
-			self.fields["suppliers"].queryset = Supplier.objects.filter(organization=self._organization).order_by("name")
+			self.fields["suppliers"].queryset = Supplier.objects.filter(organizations=self._organization).order_by("name")
 		# Build choices for field_name as single select
 		all_fields = []
 		if self._category is not None:

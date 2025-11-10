@@ -35,28 +35,18 @@ class Customer(models.Model):
 
 
 class Supplier(models.Model):
-	organization = models.ForeignKey(
-		Organization, on_delete=models.CASCADE, related_name="suppliers"
+	organizations = models.ManyToManyField(
+		Organization, related_name="suppliers", verbose_name="Organizasyonlar"
 	)
 	user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="supplier_profile")
 	name = models.CharField(max_length=200)
-	email = models.EmailField(blank=True, null=True)
+	email = models.EmailField(blank=True, null=True, unique=True)
 	phone = models.CharField(max_length=50, blank=True)
 	notes = models.TextField(blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
 		ordering = ["name"]
-		indexes = [
-			models.Index(fields=["organization", "name"]),
-		]
-		constraints = [
-			models.UniqueConstraint(
-				fields=["organization", "email"],
-				condition=models.Q(email__isnull=False),
-				name="unique_supplier_email_per_org"
-			),
-		]
 
 	def __str__(self) -> str:
 		return f"{self.name}"
@@ -78,9 +68,11 @@ class SupplierProduct(models.Model):
 		unique_together = (("supplier", "name"),)
 
 	def clean(self):
-		# All orgs must match
-		if self.organization_id and self.supplier_id and self.organization_id != self.supplier.organization_id:
-			raise ValidationError("Ürün ve tedarikçi aynı organizasyonda olmalıdır.")
+		# Validate supplier is in this organization
+		if self.organization_id and self.supplier_id:
+			if not self.supplier.organizations.filter(pk=self.organization_id).exists():
+				raise ValidationError("Tedarikçi bu organizasyonda bulunmuyor.")
+		# Validate category is in same organization
 		if self.organization_id and self.category_id and self.organization_id != self.category.organization_id:
 			raise ValidationError("Ürün ve kategori aynı organizasyonda olmalıdır.")
 
@@ -101,11 +93,11 @@ class Category(models.Model):
 		unique_together = (("organization", "name"),)
 
 	def clean(self):
-		# Validate that all selected suppliers, if any, belong to the same organization
+		# Validate that all selected suppliers are in this organization
 		if self.organization_id and self.pk:
 			for sup in self.suppliers.all():
-				if sup.organization_id != self.organization_id:
-					raise ValidationError("Kategori ve tedarikçiler aynı organizasyonda olmalıdır.")
+				if not sup.organizations.filter(pk=self.organization_id).exists():
+					raise ValidationError(f"Tedarikçi '{sup.name}' bu organizasyonda bulunmuyor.")
 		# Validate parent category is in same organization
 		if self.parent_id and self.organization_id:
 			if self.parent.organization_id != self.organization_id:
@@ -381,12 +373,11 @@ class Quote(models.Model):
 		unique_together = (("ticket", "supplier"),)
 
 	def clean(self):
-		# supplier and ticket must belong to same organization via category/ticket.customer
+		# supplier must be in the same organization as the ticket
 		if self.ticket_id and self.supplier_id:
-			sup_org_id = self.supplier.organization_id
-			# ticket org id is on ticket
-			if self.ticket.organization_id and sup_org_id and self.ticket.organization_id != sup_org_id:
-				raise ValidationError("Teklif organizasyon uyumsuzluğu.")
+			ticket_org_id = self.ticket.organization_id
+			if ticket_org_id and not self.supplier.organizations.filter(pk=ticket_org_id).exists():
+				raise ValidationError(f"Tedarikçi '{self.supplier.name}' bu organizasyonda bulunmuyor.")
 
 	def __str__(self) -> str:
 		return f"{self.supplier.name} -> {self.ticket_id}: {self.amount} {self.currency}"

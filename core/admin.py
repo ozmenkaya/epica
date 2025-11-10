@@ -12,8 +12,8 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
-	list_display = ("name", "email", "phone", "organization", "user", "created_at")
-	list_filter = ("organization",)
+	list_display = ("name", "email", "phone", "user", "created_at")
+	filter_horizontal = ("organizations",)
 	search_fields = ("name", "email", "phone")
 
 
