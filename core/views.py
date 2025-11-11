@@ -1927,19 +1927,31 @@ def ticket_detail_owner(request, pk: int):
 			# Monetary accumulator with 2-decimal rounding
 			total = Decimal("0.00")
 			# Percentage based per-item markup: inputs named markup_pct_<item.id>
+			# Amount based per-item markup: inputs named markup_amt_<item.id>
 			# Checkboxes named item_selected_<item.id>
 			for item in items:
 				pct_key = f"markup_pct_{item.id}"
+				amt_key = f"markup_amt_{item.id}"
 				select_key = f"item_selected_{item.id}"
 				raw_pct = request.POST.get(pct_key)
+				raw_amt = request.POST.get(amt_key)
 				is_selected = select_key in request.POST
 				
-				try:
-					pct = Decimal(raw_pct) if raw_pct not in (None, "") else Decimal("0")
-				except Exception:
-					pct = Decimal("0")
-				# Convert percentage to absolute markup amount
-				abs_markup = (item.line_total * pct / Decimal("100")) if item.line_total else Decimal("0.00")
+				# Prioritize manually entered amount over percentage
+				abs_markup = Decimal("0.00")
+				if raw_amt not in (None, ""):
+					try:
+						abs_markup = Decimal(raw_amt)
+					except Exception:
+						abs_markup = Decimal("0.00")
+				elif raw_pct not in (None, ""):
+					try:
+						pct = Decimal(raw_pct)
+						# Convert percentage to absolute markup amount
+						abs_markup = (item.line_total * pct / Decimal("100")) if item.line_total else Decimal("0.00")
+					except Exception:
+						abs_markup = Decimal("0.00")
+				
 				# Quantize to 2 decimal places using half-up to satisfy DecimalField(2)
 				abs_markup = abs_markup.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 				OwnerQuoteAdjustment.objects.update_or_create(
