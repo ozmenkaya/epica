@@ -13,6 +13,7 @@
   </style>
 </head>
 <body>
+  <!-- Debug: items_subtotal={{ items_subtotal }}, grand_total={{ grand_total }}, currency={{ currency }} -->
   <h1>Teklif #{{ ticket.id }} - {{ ticket.title }}</h1>
   <div class="meta">
     Müşteri: {{ ticket.customer.name }}<br/>
@@ -53,11 +54,11 @@
     {% endfor %}
       <tr>
         <td colspan="3" class="num">Ara toplam</td>
-        <td class="num">{{ items_subtotal|default:"0"|floatformat:2 }} {{ currency }}</td>
+        <td class="num">{{ items_subtotal }} {{ currency }}</td>
       </tr>
       <tr>
         <td colspan="3" class="num"><strong>Genel toplam</strong></td>
-        <td class="num"><strong>{{ grand_total|default:"0"|floatformat:2 }} {{ currency }}</strong></td>
+        <td class="num"><strong>{{ grand_total }} {{ currency }}</strong></td>
       </tr>
     </tbody>
   </table>
