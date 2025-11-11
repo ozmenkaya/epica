@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from accounts.models import Organization
 from django.core.exceptions import ValidationError
+import uuid
 
 User = get_user_model()
 
@@ -313,6 +314,8 @@ class Ticket(models.Model):
 	status = models.CharField(max_length=20, choices=Status.choices, default=Status.OPEN)
 	created_at = models.DateTimeField(auto_now_add=True)
 	desired_quantity = models.PositiveIntegerField(default=1)
+	# Unique token for supplier-specific no-auth access
+	supplier_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
 	# Owner workflow: chosen supplier quote and pricing to customer
 	selected_quote = models.ForeignKey('Quote', on_delete=models.SET_NULL, null=True, blank=True, related_name='selected_for_tickets')
 	markup_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
@@ -379,6 +382,24 @@ class Ticket(models.Model):
 			return Supplier.objects.filter(id__in=list(matched_ids), organization_id=self.organization_id).order_by("name")
 		# fallback
 		return self.category.suppliers.all()
+
+
+class TicketEmailReply(models.Model):
+	"""Email replies from suppliers to ticket requests."""
+	ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="email_replies")
+	supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True, related_name='email_replies')
+	from_email = models.EmailField()
+	subject = models.CharField(max_length=255, blank=True)
+	body = models.TextField()
+	received_at = models.DateTimeField(auto_now_add=True)
+	# Store raw email data if needed
+	raw_data = models.JSONField(default=dict, blank=True)
+
+	class Meta:
+		ordering = ["-received_at"]
+
+	def __str__(self) -> str:
+		return f"Reply from {self.from_email} for Ticket #{self.ticket_id}"
 
 
 class TicketAttachment(models.Model):
