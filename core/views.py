@@ -1107,6 +1107,15 @@ def customer_offers_detail(request, pk: int):
 
 @login_required
 def customer_offers_pdf(request, pk: int):
+	# CRITICAL DEBUG - Check if this view is even being called
+	import sys
+	sys.stderr.write(f"\n\n{'='*60}\n")
+	sys.stderr.write(f"CUSTOMER_OFFERS_PDF VIEW CALLED!\n")
+	sys.stderr.write(f"pk={pk}, debug={request.GET.get('debug')}\n")
+	sys.stderr.write(f"user={request.user}\n")
+	sys.stderr.write(f"{'='*60}\n\n")
+	sys.stderr.flush()
+	
 	cust = getattr(request.user, "customer_profile", None)
 	if not cust:
 		return redirect("home")
