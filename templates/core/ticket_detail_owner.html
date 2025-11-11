@@ -130,7 +130,7 @@
                     <th>{% trans "Açıklama" %}</th>
                     <th class="text-end">{% trans "Tedarikçi Tutarı" %}</th>
                     <th style="width:110px" class="text-end">% {% trans "Kar" %}</th>
-                    <th class="text-end">{% trans "Kar (₺)" %}</th>
+                    <th class="text-end" id="markup-header">{% trans "Kar" %} (<span id="currency-symbol">₺</span>)</th>
                     <th class="text-end">{% trans "Satış Tutarı" %}</th>
                   </tr>
                 </thead>
@@ -158,10 +158,27 @@
 {{ analysis_base|json_script:"analysis-base" }}
 <script>
   (function(){
+    function getCurrencySymbol(currency){
+      const symbols = {
+        'TRY': '₺',
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£'
+      };
+      return symbols[currency] || currency;
+    }
+    
     function loadQuoteItems(quoteId){
       const data = JSON.parse(document.getElementById('quotes-data').textContent);
       const q = data.find(x=> String(x.id) === String(quoteId));
       if(!q){ return; }
+      
+      // Update currency symbol in header
+      const currencySymbolEl = document.getElementById('currency-symbol');
+      if(currencySymbolEl){
+        currencySymbolEl.textContent = getCurrencySymbol(q.currency);
+      }
+      
       // Build tbody
       const tbody = document.querySelector('#items-table tbody');
       if(!tbody){ return; }
