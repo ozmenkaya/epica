@@ -1041,11 +1041,19 @@ def customer_offers_detail(request, pk: int):
 	if ticket.selected_quote_id and ticket.selected_quote:
 		items = list(ticket.selected_quote.items.all())
 		if items:
-			adjs = {a.quote_item_id: a.markup_amount for a in ticket.owner_adjustments.all()}
+			# Get adjustments with is_selected flag
+			adjs_dict = {a.quote_item_id: {"markup_amount": a.markup_amount, "is_selected": a.is_selected} for a in ticket.owner_adjustments.all()}
 			selected_items = []
 			for it in items:
+				# Only show items that are marked as selected by owner
+				adj_data = adjs_dict.get(it.id)
+				is_selected = adj_data.get("is_selected", True) if adj_data else True
+				
+				if not is_selected:
+					continue  # Skip unselected items
+				
 				supplier_total = it.line_total
-				markup = adjs.get(it.id) or Decimal("0.00")
+				markup = adj_data.get("markup_amount") if adj_data else Decimal("0.00")
 				selected_items.append({
 					"name": (getattr(getattr(it, "product", None), "name", None) or it.description),
 					"description": it.description,
@@ -1120,10 +1128,18 @@ def customer_offers_pdf(request, pk: int):
 		currency = ticket.selected_quote.currency or ""
 		items = list(ticket.selected_quote.items.all())
 		if items:
-			adjs = {a.quote_item_id: a.markup_amount for a in ticket.owner_adjustments.all()}
+			# Get adjustments with is_selected flag
+			adjs_dict = {a.quote_item_id: {"markup_amount": a.markup_amount, "is_selected": a.is_selected} for a in ticket.owner_adjustments.all()}
 			for it in items:
+				# Only show items that are marked as selected by owner
+				adj_data = adjs_dict.get(it.id)
+				is_selected = adj_data.get("is_selected", True) if adj_data else True
+				
+				if not is_selected:
+					continue  # Skip unselected items
+				
 				supplier_total = it.line_total
-				markup = adjs.get(it.id) or Decimal("0.00")
+				markup = adj_data.get("markup_amount") if adj_data else Decimal("0.00")
 				sell_total = supplier_total + markup
 				sell_unit_price = sell_total / (it.quantity or 1)
 				selected_items.append({
