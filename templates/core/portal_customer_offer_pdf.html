@@ -41,15 +41,10 @@
     <tbody>
     {% for it in items %}
       <tr>
-        <td>
-          <div><strong>{{ it.name|default:it.description }}</strong></div>
-          {% if it.description and it.description != it.name %}
-            <div style="color:#666; font-size:10px;">{{ it.description }}</div>
-          {% endif %}
-        </td>
+        <td>{{ it.description }}</td>
         <td class="num">{{ it.quantity }}</td>
-        <td class="num">{{ it.sell_unit_price }} {{ currency }}</td>
-        <td class="num">{{ it.sell_total }} {{ currency }}</td>
+        <td class="num">{{ it.sell_unit_price|floatformat:2 }} {{ currency }}</td>
+        <td class="num">{{ it.sell_total|floatformat:2 }} {{ currency }}</td>
       </tr>
     {% empty %}
       <tr>
@@ -58,11 +53,11 @@
     {% endfor %}
       <tr>
         <td colspan="3" class="num">Ara toplam</td>
-        <td class="num">{{ items_subtotal }} {{ currency }}</td>
+        <td class="num">{{ items_subtotal|floatformat:2 }} {{ currency }}</td>
       </tr>
       <tr>
         <td colspan="3" class="num"><strong>Genel toplam</strong></td>
-        <td class="num"><strong>{{ grand_total }} {{ currency }}</strong></td>
+        <td class="num"><strong>{{ grand_total|floatformat:2 }} {{ currency }}</strong></td>
       </tr>
     </tbody>
   </table>
