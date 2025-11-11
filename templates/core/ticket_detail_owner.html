@@ -12,7 +12,16 @@
           <div class="col-12 col-md-auto"><strong>{% trans "Kategori" %}:</strong> {{ ticket.category.name }}</div>
           <div class="col-12 col-md-auto"><strong>{% trans "Müşteri" %}:</strong> {{ ticket.customer.name }}</div>
           <div class="col-12 col-md-auto"><strong>{% trans "Durum" %}:</strong> {{ ticket.get_status_display }}</div>
+          {% if ticket.desired_quantity %}
+          <div class="col-12 col-md-auto"><strong>{% trans "Adet" %}:</strong> {{ ticket.desired_quantity }}</div>
+          {% endif %}
         </div>
+        {% if ticket.description %}
+        <div class="mt-2">
+          <strong>{% trans "Açıklama" %}:</strong>
+          <div class="text-muted">{{ ticket.description|linebreaksbr }}</div>
+        </div>
+        {% endif %}
         {% if extra_fields %}
         <div class="mt-2">
           <strong>{% trans "Form Yanıtları" %}:</strong>
