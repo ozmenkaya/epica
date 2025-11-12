@@ -27,7 +27,7 @@
       <div class="d-flex flex-wrap gap-2 align-items-center">
         <div class="me-auto">
           <div class="text-muted small">Sunulan Fiyat</div>
-            <div class="h4 mb-0">{{ grand_total|default:ticket.offered_price }} {{ ticket.selected_quote.currency }}</div>
+            <div class="h4 mb-0">{{ grand_total|default:ticket.offered_price|remove_trailing_zeros }} {{ ticket.selected_quote.currency }}</div>
           {% if ticket.offered_note %}<div class="text-muted fst-italic small mt-1">{{ ticket.offered_note }}</div>{% endif %}
         </div>
         <form method="post" class="d-flex flex-wrap gap-2 ms-auto">
@@ -62,17 +62,17 @@
                         {% endif %}
                       </td>
                       <td class="text-end">{{ it.quantity }}</td>
-                      <td class="text-end">{{ it.sell_unit_price }} {{ ticket.selected_quote.currency }}</td>
-                      <td class="text-end fw-bold">{{ it.sell_total }} {{ ticket.selected_quote.currency }}</td>
+                      <td class="text-end">{{ it.sell_unit_price|remove_trailing_zeros }} {{ ticket.selected_quote.currency }}</td>
+                      <td class="text-end fw-bold">{{ it.sell_total|remove_trailing_zeros }} {{ ticket.selected_quote.currency }}</td>
                     </tr>
                   {% endfor %}
                   <tr>
                     <td colspan="3" class="text-end">Ara toplam</td>
-                    <td class="text-end fw-bold">{{ items_subtotal|default:ticket.offered_price }} {{ ticket.selected_quote.currency }}</td>
+                    <td class="text-end fw-bold">{{ items_subtotal|default:ticket.offered_price|remove_trailing_zeros }} {{ ticket.selected_quote.currency }}</td>
                   </tr>
                   <tr>
                     <td colspan="3" class="text-end">Genel toplam</td>
-                    <td class="text-end fw-bold">{{ grand_total|default:ticket.offered_price }} {{ ticket.selected_quote.currency }}</td>
+                    <td class="text-end fw-bold">{{ grand_total|default:ticket.offered_price|remove_trailing_zeros }} {{ ticket.selected_quote.currency }}</td>
                   </tr>
                 </tbody>
               </table>
