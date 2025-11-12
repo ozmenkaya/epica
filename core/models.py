@@ -380,7 +380,7 @@ class Ticket(models.Model):
 			except Exception:
 				continue
 		if matched_ids:
-			return Supplier.objects.filter(id__in=list(matched_ids), organization_id=self.organization_id).order_by("name")
+			return Supplier.objects.filter(id__in=list(matched_ids), organizations=self.organization_id).order_by("name")
 		# fallback
 		return self.category.suppliers.all()
 
