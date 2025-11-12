@@ -58,6 +58,17 @@
             <li class="text-muted">{% trans "Henüz teklif yok." %}</li>
           {% endfor %}
         </ul>
+        
+        {% if suppliers_without_quotes %}
+        <div class="mt-3 pt-3 border-top">
+          <small class="text-muted d-block mb-2"><strong>{% trans "Teklif Beklenenler" %}:</strong></small>
+          <ul class="mb-0 small">
+            {% for supplier in suppliers_without_quotes %}
+              <li class="text-warning">{{ supplier.name }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
       </div>
     </div>
 

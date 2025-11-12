@@ -2119,6 +2119,11 @@ def ticket_detail_owner(request, pk: int):
 			for k, v in (obj.extra_data or {}).items():
 				extra_fields.append({"label": k, "value": v})
 
+	# Find suppliers who haven't submitted quotes
+	assigned_suppliers = obj.assigned_suppliers
+	suppliers_with_quotes = {q.supplier for q in quotes}
+	suppliers_without_quotes = [s for s in assigned_suppliers if s not in suppliers_with_quotes]
+
 	return render(
 		request,
 		"core/ticket_detail_owner.html",
@@ -2131,6 +2136,7 @@ def ticket_detail_owner(request, pk: int):
 			"extra_fields": extra_fields,
 			"quotes_data": quotes_data,
 			"analysis_base": analysis_base,
+			"suppliers_without_quotes": suppliers_without_quotes,
 		},
 	)
 
