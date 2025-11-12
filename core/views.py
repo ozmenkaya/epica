@@ -2558,30 +2558,39 @@ def supplier_access_token(request, token: str):
 		
 		# Create or update quote
 		note = request.POST.get("note", "").strip()
-		amount_str = request.POST.get("amount", "0").strip()
+		unit_price_str = request.POST.get("amount", "0").strip()  # Form field name is "amount" but it's unit price now
 		currency = request.POST.get("currency", "TRY").strip()
 		
 		try:
-			amount = Decimal(amount_str)
+			unit_price = Decimal(unit_price_str).quantize(Decimal("0.000001"))
 		except Exception:
-			amount = Decimal("0.00")
+			unit_price = Decimal("0.000000")
+		
+		# Calculate total amount from unit price and quantity
+		qty = ticket.desired_quantity or 1
+		total_amount = (unit_price * Decimal(qty)).quantize(Decimal("0.01"))
 		
 		# Check if quote already exists
 		existing_quote = Quote.objects.filter(ticket=ticket, supplier=supplier).first()
 		if existing_quote:
 			existing_quote.note = note
-			existing_quote.amount = amount
+			existing_quote.amount = total_amount
 			existing_quote.currency = currency
 			existing_quote.save()
 			
-			# Ensure at least one quote item exists for owner markup calculation
-			if not existing_quote.items.exists() and amount > 0:
-				qty = ticket.desired_quantity or 1
+			# Update or create quote item with unit price
+			item = existing_quote.items.first()
+			if item:
+				item.unit_price = unit_price
+				item.quantity = qty
+				item.description = ticket.description or ticket.title
+				item.save()
+			else:
 				QuoteItem.objects.create(
 					quote=existing_quote,
 					description=ticket.description or ticket.title,
 					quantity=qty,
-					unit_price=(amount / Decimal(qty)).quantize(Decimal("0.000001")),
+					unit_price=unit_price,
 				)
 			
 			messages.success(request, "Teklifiniz güncellendi.")
@@ -2590,19 +2599,17 @@ def supplier_access_token(request, token: str):
 				ticket=ticket,
 				supplier=supplier,
 				note=note,
-				amount=amount,
+				amount=total_amount,
 				currency=currency,
 			)
 			
-			# Create a default quote item for owner markup calculation
-			if amount > 0:
-				qty = ticket.desired_quantity or 1
-				QuoteItem.objects.create(
-					quote=new_quote,
-					description=ticket.description or ticket.title,
-					quantity=qty,
-					unit_price=(amount / Decimal(qty)).quantize(Decimal("0.000001")),
-				)
+			# Create quote item with unit price
+			QuoteItem.objects.create(
+				quote=new_quote,
+				description=ticket.description or ticket.title,
+				quantity=qty,
+				unit_price=unit_price,
+			)
 			
 			messages.success(request, "Teklifiniz alındı. Teşekkür ederiz!")
 		
@@ -2610,8 +2617,16 @@ def supplier_access_token(request, token: str):
 	
 	# Check if supplier already submitted a quote
 	existing_quote = None
+	existing_unit_price = None
 	if supplier:
 		existing_quote = Quote.objects.filter(ticket=ticket, supplier=supplier).first()
+		if existing_quote:
+			# Calculate unit price from quote item or from total amount
+			item = existing_quote.items.first()
+			if item:
+				existing_unit_price = item.unit_price
+			elif existing_quote.amount and ticket.desired_quantity:
+				existing_unit_price = (existing_quote.amount / Decimal(ticket.desired_quantity)).quantize(Decimal("0.000001"))
 	
 	return render(
 		request,
@@ -2622,6 +2637,7 @@ def supplier_access_token(request, token: str):
 			"supplier": supplier,
 			"supplier_email": supplier_email,
 			"existing_quote": existing_quote,
+			"existing_unit_price": existing_unit_price,
 			"organization": ticket.organization,
 		},
 	)
