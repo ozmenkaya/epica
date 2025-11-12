@@ -2514,8 +2514,11 @@ def supplier_access_token(request, token: str):
 	supplier_email = request.GET.get('email', '').strip()
 	supplier = None
 	if supplier_email:
-		# Try to find supplier by email in ticket's assigned suppliers
-		supplier = ticket.assigned_suppliers.filter(email=supplier_email).first()
+		# Try to find supplier by email
+		supplier = Supplier.objects.filter(email=supplier_email).first()
+		if not supplier:
+			# Try to find in ticket's category suppliers
+			supplier = ticket.category.suppliers.filter(email=supplier_email).first()
 	
 	# Prepare extra fields for display
 	extra_fields = []
@@ -2538,17 +2541,21 @@ def supplier_access_token(request, token: str):
 	
 	# Handle quote submission
 	if request.method == "POST":
-		# Get or create supplier from form data
+		# Get supplier from form data
 		sup_email = request.POST.get("supplier_email", "").strip()
 		sup_name = request.POST.get("supplier_name", "").strip()
 		
-		if not sup_email or not sup_name:
-			messages.error(request, "Lütfen e-posta ve firma adınızı giriniz.")
-			return redirect(request.path)
+		if not sup_email:
+			messages.error(request, "Lütfen e-posta adresinizi giriniz.")
+			return redirect(request.path + f"?email={sup_email}")
 		
 		# Find or create supplier
 		supplier = Supplier.objects.filter(email=sup_email).first()
 		if not supplier:
+			# If supplier not found and no name provided, require name
+			if not sup_name:
+				messages.error(request, "Lütfen firma adınızı giriniz.")
+				return redirect(request.path + f"?email={sup_email}")
 			# Create new supplier
 			supplier = Supplier.objects.create(
 				name=sup_name,
@@ -2556,6 +2563,10 @@ def supplier_access_token(request, token: str):
 			)
 			supplier.organizations.add(ticket.organization)
 		else:
+			# Update name if provided and different
+			if sup_name and sup_name != supplier.name:
+				supplier.name = sup_name
+				supplier.save()
 			# Ensure supplier is in ticket's organization
 			if not supplier.organizations.filter(id=ticket.organization_id).exists():
 				supplier.organizations.add(ticket.organization)

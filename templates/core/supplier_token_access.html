@@ -114,18 +114,36 @@
           <form method="post">
             {% csrf_token %}
             
-            <div class="mb-3">
-              <label for="supplier_email" class="form-label">E-posta Adresiniz <span class="text-danger">*</span></label>
-              <input type="email" class="form-control" id="supplier_email" name="supplier_email" 
-                     value="{{ supplier_email }}" required>
-              <small class="text-muted">Teklifiniz bu e-posta adresine kayıt edilecektir.</small>
-            </div>
+            {% if supplier_email and supplier %}
+              {# Email came from link - auto-filled and readonly #}
+              <div class="mb-3">
+                <label class="form-label">E-posta Adresiniz</label>
+                <input type="email" class="form-control" value="{{ supplier_email }}" readonly>
+                <input type="hidden" name="supplier_email" value="{{ supplier_email }}">
+                <small class="text-muted">E-posta adresiniz otomatik olarak dolduruldu.</small>
+              </div>
 
-            <div class="mb-3">
-              <label for="supplier_name" class="form-label">Firma Adınız <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="supplier_name" name="supplier_name" 
-                     value="{% if supplier %}{{ supplier.name }}{% endif %}" required>
-            </div>
+              <div class="mb-3">
+                <label class="form-label">Firma Adınız</label>
+                <input type="text" class="form-control" value="{{ supplier.name }}" readonly>
+                <input type="hidden" name="supplier_name" value="{{ supplier.name }}">
+                <small class="text-muted">Firma bilgileriniz sistemde kayıtlı.</small>
+              </div>
+            {% else %}
+              {# No email in URL or supplier not found - manual entry #}
+              <div class="mb-3">
+                <label for="supplier_email" class="form-label">E-posta Adresiniz <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="supplier_email" name="supplier_email" 
+                       value="{{ supplier_email }}" required>
+                <small class="text-muted">Teklifiniz bu e-posta adresine kayıt edilecektir.</small>
+              </div>
+
+              <div class="mb-3">
+                <label for="supplier_name" class="form-label">Firma Adınız <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="supplier_name" name="supplier_name" 
+                       value="{% if supplier %}{{ supplier.name }}{% endif %}" required>
+              </div>
+            {% endif %}
 
             <div class="mb-3">
               <label for="amount" class="form-label">Teklif Tutarı <span class="text-danger">*</span></label>

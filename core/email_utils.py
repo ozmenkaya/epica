@@ -238,8 +238,8 @@ def send_ticket_to_suppliers(ticket, supplier_list):
         if not supplier.email:
             continue
         
-        # Generate unique supplier link
-        supplier_link = f"{site_url}/tr/supplier-access/{ticket.supplier_token}/"
+        # Generate unique supplier link with email parameter for auto-fill
+        supplier_link = f"{site_url}/tr/supplier-access/{ticket.supplier_token}/?email={supplier.email}"
         
         context = {
             'ticket': ticket,
