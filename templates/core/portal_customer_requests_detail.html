@@ -11,9 +11,15 @@
         {% if ticket.desired_quantity %}
         <div class="mb-2"><strong>Adet:</strong> {{ ticket.desired_quantity }}</div>
         {% endif %}
-  {% if ticket.offered_price %}
-  <div class="alert alert-info py-2">Size sunulan fiyat: <strong>{{ ticket.offered_price }} {{ ticket.selected_quote.currency }}</strong>{% if ticket.offered_note %} <span class="text-muted">- {{ ticket.offered_note }}</span>{% endif %}</div>
-  {% endif %}
+        {% if ticket.offered_price %}
+        <div class="mb-2">
+          <strong>Size sunulan fiyat:</strong> 
+          <span class="text-primary fs-5">{{ ticket.offered_price }} {{ ticket.selected_quote.currency }}</span>
+          {% if ticket.offered_note %}
+            <div class="text-muted small mt-1">{{ ticket.offered_note }}</div>
+          {% endif %}
+        </div>
+        {% endif %}
         <div class="mb-3"><strong>Açıklama:</strong><br>{{ ticket.description|linebreaksbr }}</div>
         {% if extra_fields %}
         <div class="mb-3">
