@@ -2575,13 +2575,13 @@ def supplier_access_token(request, token: str):
 			existing_quote.save()
 			
 			# Ensure at least one quote item exists for owner markup calculation
-			if not existing_quote.items.exists():
+			if not existing_quote.items.exists() and amount > 0:
+				qty = ticket.desired_quantity or 1
 				QuoteItem.objects.create(
 					quote=existing_quote,
 					description=ticket.description or ticket.title,
-					quantity=ticket.desired_quantity or 1,
-					unit_price=amount / Decimal(ticket.desired_quantity or 1),
-					line_total=amount,
+					quantity=qty,
+					unit_price=(amount / Decimal(qty)).quantize(Decimal("0.01")),
 				)
 			
 			messages.success(request, "Teklifiniz güncellendi.")
@@ -2595,13 +2595,14 @@ def supplier_access_token(request, token: str):
 			)
 			
 			# Create a default quote item for owner markup calculation
-			QuoteItem.objects.create(
-				quote=new_quote,
-				description=ticket.description or ticket.title,
-				quantity=ticket.desired_quantity or 1,
-				unit_price=amount / Decimal(ticket.desired_quantity or 1),
-				line_total=amount,
-			)
+			if amount > 0:
+				qty = ticket.desired_quantity or 1
+				QuoteItem.objects.create(
+					quote=new_quote,
+					description=ticket.description or ticket.title,
+					quantity=qty,
+					unit_price=(amount / Decimal(qty)).quantize(Decimal("0.01")),
+				)
 			
 			messages.success(request, "Teklifiniz alındı. Teşekkür ederiz!")
 		
