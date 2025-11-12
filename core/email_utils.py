@@ -186,6 +186,7 @@ def send_ticket_to_suppliers(ticket, supplier_list):
     """
     Send ticket notification email to suppliers with PDF attachment and unique access link.
     Each supplier gets a separate email (BCC not used, each email is individual).
+    Uses organization's email settings if configured, otherwise uses default settings.
     
     Args:
         ticket: Ticket instance
@@ -196,6 +197,33 @@ def send_ticket_to_suppliers(ticket, supplier_list):
     """
     if not supplier_list:
         return 0
+    
+    # Check if organization has custom email settings
+    org = ticket.organization
+    use_org_settings = (
+        org.email_host and 
+        org.email_port and 
+        org.email_host_user and 
+        org.email_host_password
+    )
+    
+    # Configure email connection
+    if use_org_settings:
+        from django.core.mail import get_connection
+        connection = get_connection(
+            backend='django.core.mail.backends.smtp.EmailBackend',
+            host=org.email_host,
+            port=org.email_port,
+            username=org.email_host_user,
+            password=org.email_host_password,
+            use_tls=org.email_use_tls,
+            use_ssl=org.email_use_ssl,
+            fail_silently=False,
+        )
+        from_email = org.email_from_address or org.email_host_user
+    else:
+        connection = None  # Use default connection
+        from_email = settings.DEFAULT_FROM_EMAIL
     
     # Generate PDF once
     pdf_file = generate_ticket_pdf(ticket)
@@ -224,13 +252,14 @@ def send_ticket_to_suppliers(ticket, supplier_list):
         html_content = render_to_string('core/email/ticket_notification.html', context)
         text_content = strip_tags(html_content)
         
-        # Create email
+        # Create email with organization's connection
         email = EmailMultiAlternatives(
             subject=f'Yeni Talep #{ticket.id} - {ticket.title}',
             body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=from_email,
             to=[supplier.email],
-            reply_to=[settings.DEFAULT_FROM_EMAIL],  # Suppliers can reply to this
+            reply_to=[from_email],
+            connection=connection,
         )
         email.attach_alternative(html_content, "text/html")
         
@@ -242,6 +271,8 @@ def send_ticket_to_suppliers(ticket, supplier_list):
             sent_count += 1
         except Exception as e:
             print(f"Failed to send email to {supplier.email}: {e}")
+            import traceback
+            traceback.print_exc()
             continue
     
     return sent_count

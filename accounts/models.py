@@ -24,6 +24,15 @@ class Organization(models.Model):
 	slug = models.SlugField(max_length=220, unique=True, blank=True)
 	owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="owned_organizations")
 	created_at = models.DateTimeField(auto_now_add=True)
+	
+	# Email Settings
+	email_host = models.CharField(max_length=255, blank=True, help_text="SMTP sunucu adresi (örn: smtp.gmail.com)")
+	email_port = models.IntegerField(null=True, blank=True, help_text="SMTP port (örn: 587 veya 465)")
+	email_use_tls = models.BooleanField(default=True, help_text="TLS kullan (port 587 için)")
+	email_use_ssl = models.BooleanField(default=False, help_text="SSL kullan (port 465 için)")
+	email_host_user = models.CharField(max_length=255, blank=True, help_text="SMTP kullanıcı adı / email")
+	email_host_password = models.CharField(max_length=255, blank=True, help_text="SMTP şifre / App Password")
+	email_from_address = models.EmailField(blank=True, help_text="Gönderen email adresi")
 
 	class Meta:
 		ordering = ["name"]
