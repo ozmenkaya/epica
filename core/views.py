@@ -615,16 +615,12 @@ def supplier_detail(request, pk: int):
 	org = getattr(request, "tenant", None)
 	supplier = get_object_or_404(Supplier, pk=pk, organizations=org)
 	
-	# Bu tedarikçiye gönderilen tüm ticketlar
+	# Bu tedarikçiye teklif verilen tüm ticketlar
 	tickets = (
 		Ticket.objects
-		.filter(organization=org)
-		.filter(
-			models.Q(sent_to_suppliers=supplier) |
-			models.Q(quote__supplier=supplier)
-		)
+		.filter(organization=org, quotes__supplier=supplier)
 		.select_related('customer', 'category')
-		.prefetch_related('quote_set')
+		.prefetch_related('quotes')
 		.distinct()
 		.order_by('-created_at')
 	)
@@ -632,7 +628,7 @@ def supplier_detail(request, pk: int):
 	# Her ticket için tedarikçinin teklifini ve durumunu al
 	ticket_data = []
 	for ticket in tickets:
-		supplier_quote = ticket.quote_set.filter(supplier=supplier).first()
+		supplier_quote = ticket.quotes.filter(supplier=supplier).first()
 		ticket_data.append({
 			'ticket': ticket,
 			'quote': supplier_quote,
