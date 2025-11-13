@@ -38,7 +38,11 @@
         <tbody>
         {% for s in suppliers %}
           <tr>
-            <td class="fw-medium">{{ s.name }}</td>
+            <td class="fw-medium">
+              <a href="{% url 'supplier_detail' s.id %}" class="text-decoration-none">
+                {{ s.name }}
+              </a>
+            </td>
             <td><span class="text-muted">{{ s.email|default:"-" }}</span></td>
             <td><span class="text-muted">{{ s.phone|default:"-" }}</span></td>
             <td><small class="text-muted">{{ s.created_at|date:"Y-m-d H:i" }}</small></td>

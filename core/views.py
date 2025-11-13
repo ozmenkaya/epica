@@ -610,6 +610,63 @@ def customers_delete(request, pk: int):
 
 
 @tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+def supplier_detail(request, pk: int):
+	"""Tedarikçi detay sayfası - verilen işler, müşteriler, durumlar"""
+	org = getattr(request, "tenant", None)
+	supplier = get_object_or_404(Supplier, pk=pk, organizations=org)
+	
+	# Bu tedarikçiye gönderilen tüm ticketlar
+	tickets = (
+		Ticket.objects
+		.filter(organization=org)
+		.filter(
+			models.Q(sent_to_suppliers=supplier) |
+			models.Q(quote__supplier=supplier)
+		)
+		.select_related('customer', 'category')
+		.prefetch_related('quote_set')
+		.distinct()
+		.order_by('-created_at')
+	)
+	
+	# Her ticket için tedarikçinin teklifini ve durumunu al
+	ticket_data = []
+	for ticket in tickets:
+		supplier_quote = ticket.quote_set.filter(supplier=supplier).first()
+		ticket_data.append({
+			'ticket': ticket,
+			'quote': supplier_quote,
+			'has_quote': supplier_quote is not None,
+		})
+	
+	# İstatistikler
+	total_tickets = len(ticket_data)
+	tickets_with_quotes = sum(1 for td in ticket_data if td['has_quote'])
+	tickets_without_quotes = total_tickets - tickets_with_quotes
+	
+	# Tedarikçinin kabul edilen teklifleri (siparişe dönüşenler)
+	accepted_quotes = (
+		Quote.objects
+		.filter(supplier=supplier, ticket__organization=org)
+		.exclude(accepted_at__isnull=True)
+		.select_related('ticket__customer')
+		.order_by('-accepted_at')
+	)
+	
+	context = {
+		'org': org,
+		'supplier': supplier,
+		'ticket_data': ticket_data,
+		'total_tickets': total_tickets,
+		'tickets_with_quotes': tickets_with_quotes,
+		'tickets_without_quotes': tickets_without_quotes,
+		'accepted_quotes': accepted_quotes,
+	}
+	
+	return render(request, "core/supplier_detail.html", context)
+
+
+@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
 def suppliers_edit(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Supplier, pk=pk, organizations=org)

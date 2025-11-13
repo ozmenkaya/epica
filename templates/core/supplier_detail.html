@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container-fluid">
+	<!-- Tedarikçi Başlık -->
+	<div class="card shadow-sm mb-4">
+		<div class="card-header d-flex justify-content-between align-items-center">
+			<h4 class="mb-0">
+				<i class="bi bi-building"></i> {{ supplier.name }}
+			</h4>
+			<div>
+				{% if tenant_is_owner or tenant_is_admin %}
+					<a class="btn btn-sm btn-outline-primary" href="{% url 'suppliers_edit' supplier.id %}">
+						<i class="bi bi-pencil"></i> {% trans "Düzenle" %}
+					</a>
+				{% endif %}
+				<a class="btn btn-sm btn-outline-secondary" href="{% url 'suppliers_list' %}">
+					<i class="bi bi-arrow-left"></i> {% trans "Geri" %}
+				</a>
+			</div>
+		</div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-4">
+					<p class="mb-2">
+						<strong>{% trans "Email:" %}</strong><br>
+						<span class="text-muted">{{ supplier.email|default:"-" }}</span>
+					</p>
+				</div>
+				<div class="col-md-4">
+					<p class="mb-2">
+						<strong>{% trans "Telefon:" %}</strong><br>
+						<span class="text-muted">{{ supplier.phone|default:"-" }}</span>
+					</p>
+				</div>
+				<div class="col-md-4">
+					<p class="mb-2">
+						<strong>{% trans "Kayıt Tarihi:" %}</strong><br>
+						<span class="text-muted">{{ supplier.created_at|date:"Y-m-d H:i" }}</span>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- İstatistikler -->
+	<div class="row mb-4">
+		<div class="col-md-4">
+			<div class="card text-center">
+				<div class="card-body">
+					<h2 class="text-primary mb-0">{{ total_tickets }}</h2>
+					<p class="text-muted mb-0">{% trans "Toplam Gönderilen İş" %}</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card text-center">
+				<div class="card-body">
+					<h2 class="text-success mb-0">{{ tickets_with_quotes }}</h2>
+					<p class="text-muted mb-0">{% trans "Teklif Verilen İş" %}</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card text-center">
+				<div class="card-body">
+					<h2 class="text-warning mb-0">{{ tickets_without_quotes }}</h2>
+					<p class="text-muted mb-0">{% trans "Teklif Bekleyen İş" %}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Kabul Edilen Teklifler (Siparişler) -->
+	{% if accepted_quotes %}
+	<div class="card shadow-sm mb-4">
+		<div class="card-header bg-success text-white">
+			<h5 class="mb-0">
+				<i class="bi bi-check-circle"></i> {% trans "Kabul Edilen Teklifler (Siparişler)" %}
+			</h5>
+		</div>
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-sm table-hover">
+					<thead class="table-light">
+						<tr>
+							<th>{% trans "Ticket #" %}</th>
+							<th>{% trans "Müşteri" %}</th>
+							<th>{% trans "Başlık" %}</th>
+							<th>{% trans "Tutar" %}</th>
+							<th>{% trans "Kabul Tarihi" %}</th>
+							<th>{% trans "Durum" %}</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for quote in accepted_quotes %}
+						<tr>
+							<td>
+								<a href="{% url 'ticket_detail_owner' quote.ticket.id %}" class="text-decoration-none">
+									#{{ quote.ticket.id }}
+								</a>
+							</td>
+							<td>{{ quote.ticket.customer.name }}</td>
+							<td>{{ quote.ticket.title|truncatewords:8 }}</td>
+							<td>
+								<strong>{{ quote.amount }} {{ quote.currency }}</strong>
+							</td>
+							<td>
+								<small class="text-muted">{{ quote.accepted_at|date:"Y-m-d H:i" }}</small>
+							</td>
+							<td>
+								{% if quote.ticket.status == 'completed' %}
+									<span class="badge bg-success">{% trans "Tamamlandı" %}</span>
+								{% elif quote.ticket.status == 'in_progress' %}
+									<span class="badge bg-info">{% trans "Devam Ediyor" %}</span>
+								{% else %}
+									<span class="badge bg-secondary">{{ quote.ticket.get_status_display }}</span>
+								{% endif %}
+							</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
+	<!-- Gönderilen İşler -->
+	<div class="card shadow-sm">
+		<div class="card-header">
+			<h5 class="mb-0">
+				<i class="bi bi-list-task"></i> {% trans "Gönderilen Tüm İşler" %}
+			</h5>
+		</div>
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-sm table-hover">
+					<thead class="table-light">
+						<tr>
+							<th>{% trans "Ticket #" %}</th>
+							<th>{% trans "Müşteri" %}</th>
+							<th>{% trans "Kategori" %}</th>
+							<th>{% trans "Başlık" %}</th>
+							<th>{% trans "Durum" %}</th>
+							<th>{% trans "Teklif Durumu" %}</th>
+							<th>{% trans "Teklif Tutarı" %}</th>
+							<th>{% trans "Tarih" %}</th>
+						</tr>
+					</thead>
+					<tbody>
+					{% for td in ticket_data %}
+						<tr>
+							<td>
+								<a href="{% url 'ticket_detail_owner' td.ticket.id %}" class="text-decoration-none">
+									#{{ td.ticket.id }}
+								</a>
+							</td>
+							<td>{{ td.ticket.customer.name }}</td>
+							<td>
+								<small class="text-muted">{{ td.ticket.category.name|default:"-" }}</small>
+							</td>
+							<td>{{ td.ticket.title|truncatewords:10 }}</td>
+							<td>
+								{% if td.ticket.status == 'completed' %}
+									<span class="badge bg-success">{% trans "Tamamlandı" %}</span>
+								{% elif td.ticket.status == 'in_progress' %}
+									<span class="badge bg-info">{% trans "Devam Ediyor" %}</span>
+								{% elif td.ticket.status == 'waiting_quote' %}
+									<span class="badge bg-warning">{% trans "Teklif Bekleniyor" %}</span>
+								{% elif td.ticket.status == 'quoted' %}
+									<span class="badge bg-primary">{% trans "Teklif Verildi" %}</span>
+								{% else %}
+									<span class="badge bg-secondary">{{ td.ticket.get_status_display }}</span>
+								{% endif %}
+							</td>
+							<td>
+								{% if td.has_quote %}
+									{% if td.quote.accepted_at %}
+										<span class="badge bg-success">
+											<i class="bi bi-check-circle"></i> {% trans "Kabul Edildi" %}
+										</span>
+									{% else %}
+										<span class="badge bg-info">
+											<i class="bi bi-file-text"></i> {% trans "Teklif Verildi" %}
+										</span>
+									{% endif %}
+								{% else %}
+									<span class="badge bg-warning">
+										<i class="bi bi-clock"></i> {% trans "Teklif Bekleniyor" %}
+									</span>
+								{% endif %}
+							</td>
+							<td>
+								{% if td.quote %}
+									<strong>{{ td.quote.amount }} {{ td.quote.currency }}</strong>
+								{% else %}
+									<span class="text-muted">-</span>
+								{% endif %}
+							</td>
+							<td>
+								<small class="text-muted">{{ td.ticket.created_at|date:"Y-m-d" }}</small>
+							</td>
+						</tr>
+					{% empty %}
+						<tr>
+							<td colspan="8" class="text-center text-muted py-4">
+								{% trans "Bu tedarikçiye henüz iş gönderilmemiş." %}
+							</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
