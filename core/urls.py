@@ -8,6 +8,7 @@ urlpatterns = [
     path("portal/", views.portal_home, name="portal_home"),
     path("customers/", views.customers_list, name="customers_list"),
     path("customers/new/", views.customers_create, name="customers_create"),
+    path("customers/<int:pk>/", views.customer_detail, name="customer_detail"),
     path("customers/<int:pk>/edit/", views.customers_edit, name="customers_edit"),
     path("customers/<int:pk>/delete/", views.customers_delete, name="customers_delete"),
     path("suppliers/", views.suppliers_list, name="suppliers_list"),

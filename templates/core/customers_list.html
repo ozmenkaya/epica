@@ -38,7 +38,11 @@
         <tbody>
         {% for c in customers %}
           <tr>
-            <td class="fw-medium">{{ c.name }}</td>
+            <td class="fw-medium">
+              <a href="{% url 'customer_detail' c.id %}" class="text-decoration-none">
+                <i class="bi bi-person-circle"></i> {{ c.name }}
+              </a>
+            </td>
             <td><span class="text-muted">{{ c.email|default:"-" }}</span></td>
             <td><span class="text-muted">{{ c.phone|default:"-" }}</span></td>
             <td><small class="text-muted">{{ c.created_at|date:"Y-m-d H:i" }}</small></td>

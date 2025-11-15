@@ -757,6 +757,108 @@ def supplier_detail(request, pk: int):
 	return render(request, "core/supplier_detail.html", context)
 
 
+@login_required
+def customer_detail(request, pk: int):
+	"""Müşteri detay sayfası - verdiği işler, siparişler, performans"""
+	org = getattr(request, "tenant", None)
+	customer = get_object_or_404(Customer, pk=pk, organization=org)
+	
+	# Müşterinin oluşturduğu ticketlar
+	tickets = (
+		Ticket.objects
+		.filter(organization=org, customer=customer)
+		.select_related('category')
+		.prefetch_related('quotes')
+		.order_by('-created_at')
+	)
+	
+	# Her ticket için durum bilgisi
+	ticket_data = []
+	for ticket in tickets:
+		quotes_count = ticket.quotes.count()
+		has_order = ticket.selected_quote is not None
+		ticket_data.append({
+			'ticket': ticket,
+			'quotes_count': quotes_count,
+			'has_order': has_order,
+		})
+	
+	# İstatistikler
+	total_tickets = len(ticket_data)
+	tickets_with_orders = sum(1 for td in ticket_data if td['has_order'])
+	total_quotes_received = sum(td['quotes_count'] for td in ticket_data)
+	
+	# Müşterinin siparişleri
+	orders = (
+		Order.objects
+		.filter(ticket__customer=customer, ticket__organization=org)
+		.select_related('ticket__category', 'supplier')
+		.order_by('-created_at')
+	)
+	
+	# Müşteri Metrikleri ve Skoru (CustomerMetrics)
+	from .models_metrics import CustomerMetrics, OwnerReview
+	try:
+		metrics = CustomerMetrics.objects.get(customer=customer, organization=org)
+		has_metrics = True
+		
+		# Badge rengi belirleme (100 üzerinden skor)
+		score = float(metrics.overall_score)
+		if score >= 90:
+			badge_class = 'success'
+			badge_text = 'Altın'
+		elif score >= 75:
+			badge_class = 'info'
+			badge_text = 'Gümüş'
+		elif score >= 60:
+			badge_class = 'warning'
+			badge_text = 'Bronz'
+		else:
+			badge_class = 'secondary'
+			badge_text = 'Standart'
+	except CustomerMetrics.DoesNotExist:
+		metrics = None
+		has_metrics = False
+		badge_class = 'secondary'
+		badge_text = 'N/A'
+	
+	# Owner Reviews - kategoriye göre gruplandır
+	owner_reviews = OwnerReview.objects.filter(
+		customer=customer,
+		organization=org
+	).order_by('-created_at')
+	
+	# Kategoriye göre ortalama skorlar
+	review_stats = {}
+	for category_code, category_name in OwnerReview.CATEGORY_CHOICES:
+		category_reviews = owner_reviews.filter(category=category_code)
+		if category_reviews.exists():
+			avg_rating = category_reviews.aggregate(models.Avg('rating'))['rating__avg']
+			review_stats[category_code] = {
+				'name': category_name,
+				'avg': round(avg_rating, 1) if avg_rating else 0,
+				'count': category_reviews.count()
+			}
+	
+	context = {
+		'org': org,
+		'customer': customer,
+		'ticket_data': ticket_data,
+		'total_tickets': total_tickets,
+		'tickets_with_orders': tickets_with_orders,
+		'total_quotes_received': total_quotes_received,
+		'orders': orders,
+		'metrics': metrics,
+		'has_metrics': has_metrics,
+		'badge_class': badge_class,
+		'badge_text': badge_text,
+		'owner_reviews': owner_reviews[:10],
+		'review_stats': review_stats,
+	}
+	
+	return render(request, "core/customer_detail.html", context)
+
+
 @tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
 def suppliers_edit(request, pk: int):
 	org = getattr(request, "tenant", None)
