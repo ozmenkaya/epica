@@ -2907,7 +2907,7 @@ def add_owner_review(request):
 	customer_id = request.POST.get('customer_id')
 	category = request.POST.get('category')
 	rating = request.POST.get('rating')
-	notes = request.POST.get('notes', '').strip()
+	comment = request.POST.get('comment', '').strip()
 	redirect_to = request.POST.get('redirect_to', 'dashboard')
 	
 	# Validate inputs
@@ -2931,9 +2931,10 @@ def add_owner_review(request):
 	# Create review
 	review = OwnerReview(
 		organization=org,
+		reviewer=request.user,
 		category=category,
 		rating=rating,
-		notes=notes or None,
+		comment=comment or '',
 	)
 	
 	if supplier_id:

@@ -316,35 +316,52 @@
 				</div>
 				
 				<div class="modal-body">
-					<div class="mb-3">
+					<div class="mb-4">
 						<label class="form-label fw-bold">{% trans "Değerlendirme Kategorisi" %}</label>
-						<select name="category" class="form-select" required>
-							<option value="">{% trans "Seçiniz..." %}</option>
-							<option value="reliability">{% trans "Güvenilirlik" %}</option>
-							<option value="communication">{% trans "İletişim" %}</option>
-							<option value="quality">{% trans "Kalite" %}</option>
-							<option value="speed">{% trans "Hız" %}</option>
-							<option value="pricing">{% trans "Fiyatlandırma" %}</option>
-						</select>
+						<div class="list-group">
+							<label class="list-group-item list-group-item-action">
+								<input class="form-check-input me-2" type="radio" name="category" value="reliability" required>
+								<strong>{% trans "Güvenilirlik" %}</strong>
+								<small class="d-block text-muted">Taahhütlerine uyma, söz verdiğini yapma</small>
+							</label>
+							<label class="list-group-item list-group-item-action">
+								<input class="form-check-input me-2" type="radio" name="category" value="communication" required>
+								<strong>{% trans "İletişim" %}</strong>
+								<small class="d-block text-muted">Yanıt hızı, iletişim kalitesi</small>
+							</label>
+							<label class="list-group-item list-group-item-action">
+								<input class="form-check-input me-2" type="radio" name="category" value="quality" required>
+								<strong>{% trans "Kalite" %}</strong>
+								<small class="d-block text-muted">Ürün/hizmet kalitesi</small>
+							</label>
+							<label class="list-group-item list-group-item-action">
+								<input class="form-check-input me-2" type="radio" name="category" value="payment" required>
+								<strong>{% trans "Ödeme" %}</strong>
+								<small class="d-block text-muted">Ödeme şartlarına uyum</small>
+							</label>
+							<label class="list-group-item list-group-item-action">
+								<input class="form-check-input me-2" type="radio" name="category" value="pricing" required>
+								<strong>{% trans "Fiyatlandırma" %}</strong>
+								<small class="d-block text-muted">Fiyat/performans dengesi</small>
+							</label>
+						</div>
 					</div>
 					
-					<div class="mb-3">
-						<label class="form-label fw-bold">{% trans "Puan (1-5 Yıldız)" %}</label>
-						<div class="d-flex gap-3 justify-content-center py-2">
+					<div class="mb-4">
+						<label class="form-label fw-bold text-center d-block">{% trans "Puan (1-5 Yıldız)" %}</label>
+						<div class="star-rating d-flex justify-content-center gap-2 py-3">
 							{% for i in "12345" %}
-							<div class="form-check form-check-inline">
-								<input class="form-check-input" type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" required>
-								<label class="form-check-label star-label" for="rating{{ i }}" style="font-size: 2rem; cursor: pointer;">
-									⭐
-								</label>
-							</div>
+							<label class="star-label" data-value="{{ i }}">
+								<input type="radio" name="rating" value="{{ i }}" required style="display: none;">
+								<i class="bi bi-star" style="font-size: 2.5rem; cursor: pointer; color: #ddd;"></i>
+							</label>
 							{% endfor %}
 						</div>
 					</div>
 					
 					<div class="mb-3">
-						<label class="form-label fw-bold">{% trans "Notlar (Opsiyonel)" %}</label>
-						<textarea name="notes" class="form-control" rows="3" placeholder="{% trans 'Bu tedarikçi hakkında notlarınız...' %}"></textarea>
+						<label class="form-label fw-bold">{% trans "Yorum (Opsiyonel)" %}</label>
+						<textarea name="comment" class="form-control" rows="3" placeholder="{% trans 'Bu tedarikçi hakkında yorumlarınız...' %}"></textarea>
 					</div>
 				</div>
 				
@@ -362,9 +379,62 @@
 </div>
 
 <style>
-.star-label:hover {
-	transform: scale(1.2);
+.list-group-item:has(input:checked) {
+	background-color: #fff3cd;
+	border-color: #ffc107;
+}
+.star-rating .star-label i.bi-star-fill {
+	color: #ffc107 !important;
+}
+.star-rating .star-label:hover i {
+	transform: scale(1.15);
 	transition: transform 0.2s;
 }
 </style>
+
+<script>
+// Interactive star rating
+document.addEventListener('DOMContentLoaded', function() {
+	const stars = document.querySelectorAll('.star-rating .star-label');
+	let selectedRating = 0;
+	
+	stars.forEach((star, index) => {
+		const starIcon = star.querySelector('i');
+		const input = star.querySelector('input');
+		
+		// Click to select
+		star.addEventListener('click', function() {
+			selectedRating = index + 1;
+			input.checked = true;
+			updateStars();
+		});
+		
+		// Hover effect
+		star.addEventListener('mouseenter', function() {
+			for(let i = 0; i <= index; i++) {
+				stars[i].querySelector('i').classList.remove('bi-star');
+				stars[i].querySelector('i').classList.add('bi-star-fill');
+			}
+		});
+	});
+	
+	// Reset on mouse leave
+	document.querySelector('.star-rating').addEventListener('mouseleave', function() {
+		updateStars();
+	});
+	
+	function updateStars() {
+		stars.forEach((star, index) => {
+			const icon = star.querySelector('i');
+			if(index < selectedRating) {
+				icon.classList.remove('bi-star');
+				icon.classList.add('bi-star-fill');
+			} else {
+				icon.classList.remove('bi-star-fill');
+				icon.classList.add('bi-star');
+			}
+		});
+	}
+});
+</script>
 {% endblock %}
