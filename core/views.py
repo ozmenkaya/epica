@@ -695,7 +695,7 @@ def supplier_detail(request, pk: int):
 	)
 	
 	# Tedarikçi Metrikleri ve Skoru (SupplierMetrics)
-	from .models_metrics import SupplierMetrics
+	from .models_metrics import SupplierMetrics, OwnerReview
 	try:
 		metrics = SupplierMetrics.objects.get(supplier=supplier, organization=org)
 		has_metrics = True
@@ -720,6 +720,24 @@ def supplier_detail(request, pk: int):
 		badge_class = 'secondary'
 		badge_text = 'N/A'
 	
+	# Owner Reviews - kategoriye göre gruplandır
+	owner_reviews = OwnerReview.objects.filter(
+		supplier=supplier,
+		organization=org
+	).order_by('-created_at')
+	
+	# Kategoriye göre ortalama skorlar
+	review_stats = {}
+	for category_code, category_name in OwnerReview.CATEGORY_CHOICES:
+		category_reviews = owner_reviews.filter(category=category_code)
+		if category_reviews.exists():
+			avg_rating = category_reviews.aggregate(models.Avg('rating'))['rating__avg']
+			review_stats[category_code] = {
+				'name': category_name,
+				'avg': round(avg_rating, 1) if avg_rating else 0,
+				'count': category_reviews.count()
+			}
+	
 	context = {
 		'org': org,
 		'supplier': supplier,
@@ -732,6 +750,8 @@ def supplier_detail(request, pk: int):
 		'has_metrics': has_metrics,
 		'badge_class': badge_class,
 		'badge_text': badge_text,
+		'owner_reviews': owner_reviews[:10],  # Son 10 yorum
+		'review_stats': review_stats,
 	}
 	
 	return render(request, "core/supplier_detail.html", context)
