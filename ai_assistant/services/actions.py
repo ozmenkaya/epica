@@ -48,6 +48,7 @@ def search_tickets(organization, user, query: str, status: str = None, limit: in
         for ticket in tickets:
             results.append({
                 'id': ticket.id,
+                'url': f'https://epica.com.tr/tr/tickets/{ticket.id}/',
                 'title': ticket.title,
                 'status': ticket.status,
                 'category': ticket.category.name,
@@ -178,6 +179,7 @@ def search_suppliers(organization, query: str):
             categories = [cat.name for cat in supplier.categories.all()]
             results.append({
                 'id': supplier.id,
+                'url': f'https://epica.com.tr/tr/suppliers/{supplier.id}/',
                 'name': supplier.name,
                 'email': supplier.email or '',
                 'phone': supplier.phone or '',
@@ -308,7 +310,9 @@ def search_customer_orders(organization, customer_name: str):
             customer = order.ticket.customer
             results.append({
                 'order_id': order.id,
+                'order_url': f'https://epica.com.tr/tr/orders/{order.id}/',
                 'ticket_id': order.ticket_id,
+                'ticket_url': f'https://epica.com.tr/tr/tickets/{order.ticket_id}/',
                 'customer_email': customer.email or '',
                 'customer_name': customer.name,
                 'customer_phone': customer.phone or '',
@@ -362,7 +366,9 @@ def search_product_orders(organization, product_query: str):
                 customer = order.ticket.customer
                 orders_dict[order.id] = {
                     'order_id': order.id,
+                    'order_url': f'https://epica.com.tr/tr/orders/{order.id}/',
                     'ticket_id': order.ticket_id,
+                    'ticket_url': f'https://epica.com.tr/tr/tickets/{order.ticket_id}/',
                     'category': order.ticket.category.name if order.ticket.category else 'N/A',
                     'customer_email': customer.email or '',
                     'customer_name': customer.name,
