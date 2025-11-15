@@ -129,6 +129,23 @@
     word-wrap: break-word;
 }
 
+.message-content a {
+    color: inherit;
+    font-weight: 500;
+}
+
+.message-user .message-content a {
+    color: white;
+}
+
+.message-assistant .message-content a {
+    color: #007bff;
+}
+
+.message-assistant .message-content a:hover {
+    color: #0056b3;
+}
+
 .conversation-item.active {
     background-color: #007bff;
     color: white;
@@ -495,7 +512,22 @@ function appendMessage(role, content, messageId = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${role}`;
     
-    let messageHtml = `<div class="message-content">${escapeHtml(content)}</div>`;
+    // Convert markdown links to HTML links
+    let processedContent = escapeHtml(content);
+    
+    // Convert [text](url) to clickable links
+    processedContent = processedContent.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-decoration-underline">$1</a>'
+    );
+    
+    // Convert plain URLs to clickable links (if not already in a link)
+    processedContent = processedContent.replace(
+        /(?<!href="|">)(https?:\/\/[^\s<]+)/g,
+        '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-decoration-underline">$1</a>'
+    );
+    
+    let messageHtml = `<div class="message-content">${processedContent}</div>`;
     
     // Add feedback buttons for assistant messages
     if (role === 'assistant' && messageId) {
