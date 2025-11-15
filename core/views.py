@@ -2887,9 +2887,19 @@ def add_owner_review(request):
 	
 	from .models_metrics import OwnerReview
 	
-	# Check permissions
-	tenant = request.tenant
-	if not (tenant.is_owner or tenant.is_admin):
+	# Check permissions - get membership to check role
+	org = getattr(request, "tenant", None)
+	if not org:
+		return redirect('dashboard')
+	
+	mem = Membership.objects.filter(user=request.user, organization=org).first()
+	if not mem:
+		return HttpResponseForbidden("Not a member of this organization")
+	
+	is_owner = mem.role == Membership.Role.OWNER
+	is_admin = mem.role == Membership.Role.ADMIN or is_owner
+	
+	if not (is_owner or is_admin):
 		return HttpResponseForbidden("Only owner/admin can add reviews")
 	
 	# Get form data
@@ -2920,18 +2930,18 @@ def add_owner_review(request):
 	
 	# Create review
 	review = OwnerReview(
-		organization=tenant.organization,
+		organization=org,
 		category=category,
 		rating=rating,
 		notes=notes or None,
 	)
 	
 	if supplier_id:
-		supplier = get_object_or_404(Supplier, id=supplier_id, organization=tenant.organization)
+		supplier = get_object_or_404(Supplier, id=supplier_id, organizations=org)
 		review.supplier = supplier
 	
 	if customer_id:
-		customer = get_object_or_404(Customer, id=customer_id, organization=tenant.organization)
+		customer = get_object_or_404(Customer, id=customer_id, organization=org)
 		review.customer = customer
 	
 	review.save()
@@ -2939,7 +2949,7 @@ def add_owner_review(request):
 	# Log event
 	logger.info(
 		"Owner review added: org=%s, supplier=%s, customer=%s, category=%s, rating=%s",
-		tenant.organization.id,
+		org.id,
 		supplier_id or 'None',
 		customer_id or 'None',
 		category,
