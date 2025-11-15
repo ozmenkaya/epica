@@ -328,7 +328,7 @@ def ai_stats(request):
     
     # Function usage stats
     function_stats = AIAction.objects.filter(
-        conversation__organization=organization
+        message__conversation__organization=organization
     ).values('function_name').annotate(
         count=Count('id')
     ).order_by('-count')[:10]
