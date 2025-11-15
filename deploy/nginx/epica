@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name lethe.com.tr www.lethe.com.tr;
+    server_name epica.com.tr www.epica.com.tr;
 
     client_max_body_size 20M;
 

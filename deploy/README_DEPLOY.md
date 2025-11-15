@@ -79,16 +79,16 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-8) TLS (Let’s Encrypt)
+8) TLS (Let's Encrypt)
 ```bash
-sudo certbot --nginx -d lethe.com.tr -d www.lethe.com.tr --redirect -m YOUR_EMAIL@example.com --agree-tos -n
+sudo certbot --nginx -d epica.com.tr -d www.epica.com.tr --redirect -m YOUR_EMAIL@example.com --agree-tos -n
 ```
 
 9) Smoke tests
 ```bash
 curl -I http://127.0.0.1
-curl -I https://lethe.com.tr
-curl -I https://www.lethe.com.tr
+curl -I https://epica.com.tr
+curl -I https://www.epica.com.tr
 ```
 
 Troubleshooting

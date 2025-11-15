@@ -37,8 +37,8 @@ if [ ! -f ".env" ]; then
     
     # .env dosyasını düzenle
     sed -i "s/your-secret-key-here/$SECRET_KEY/" .env
-    sed -i "s/lethe.com.tr,www.lethe.com.tr/78.46.162.116/" .env
-    sed -i "s|https://lethe.com.tr,https://www.lethe.com.tr|http://78.46.162.116|" .env
+    sed -i "s/epica.com.tr,www.epica.com.tr/78.46.162.116/" .env
+    sed -i "s|https://epica.com.tr,https://www.epica.com.tr|http://78.46.162.116|" .env
     
     # PostgreSQL ayarları
     cat >> .env << 'EOF'
