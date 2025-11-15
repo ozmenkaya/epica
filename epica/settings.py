@@ -126,17 +126,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'tr-tr'
+LANGUAGE_CODE = 'tr'  # Default language
 
 TIME_ZONE = 'Europe/Istanbul'
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
 # Available languages
 LANGUAGES = [
-    ('tr', _('Turkish')),
+    ('tr', _('Türkçe')),
     ('en', _('English')),
 ]
 
@@ -144,6 +146,15 @@ LANGUAGES = [
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
+
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 year
+LANGUAGE_COOKIE_DOMAIN = None
+LANGUAGE_COOKIE_PATH = '/'
+LANGUAGE_COOKIE_SECURE = not DEBUG  # Secure in production
+LANGUAGE_COOKIE_HTTPONLY = False
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
 # Static files (CSS, JavaScript, Images)

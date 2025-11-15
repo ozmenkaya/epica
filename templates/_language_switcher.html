@@ -1,0 +1,59 @@
+{% load i18n %}
+
+<div class="language-switcher">
+	<form action="{% url 'set_language' %}" method="post" id="languageForm">
+		{% csrf_token %}
+		<input name="next" type="hidden" value="{{ request.get_full_path }}">
+		<div class="btn-group btn-group-sm" role="group" aria-label="Language Switcher">
+			<button 
+				type="submit" 
+				name="language" 
+				value="tr" 
+				class="btn {% if LANGUAGE_CODE == 'tr' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+				{% if LANGUAGE_CODE == 'tr' %}disabled{% endif %}>
+				<i class="bi bi-globe"></i> TR
+			</button>
+			<button 
+				type="submit" 
+				name="language" 
+				value="en" 
+				class="btn {% if LANGUAGE_CODE == 'en' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+				{% if LANGUAGE_CODE == 'en' %}disabled{% endif %}>
+				<i class="bi bi-globe"></i> EN
+			</button>
+		</div>
+	</form>
+</div>
+
+<style>
+.language-switcher {
+	display: inline-block;
+}
+.language-switcher form {
+	margin: 0;
+}
+.language-switcher .btn-group {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.language-switcher .btn {
+	font-weight: 500;
+	padding: 0.25rem 0.75rem;
+	border-radius: 0.25rem;
+}
+.language-switcher .btn i {
+	font-size: 0.875rem;
+}
+.language-switcher .btn:disabled {
+	cursor: not-allowed;
+}
+</style>
+
+<script>
+// Auto-submit on button click
+document.getElementById('languageForm')?.addEventListener('submit', function(e) {
+	const clickedButton = e.submitter;
+	if (clickedButton && clickedButton.disabled) {
+		e.preventDefault();
+	}
+});
+</script>

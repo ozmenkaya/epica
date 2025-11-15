@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: epica\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 08:43+0300\n"
+"POT-Creation-Date: 2025-11-15 14:04+0300\n"
 "PO-Revision-Date: 2025-09-12 00:00+0000\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -11,13 +11,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: epica/settings.py:139
-msgid "Turkish"
-msgstr ""
+#: epica/settings.py:141
+msgid "Türkçe"
+msgstr "Turkish"
 
-#: epica/settings.py:140
+#: epica/settings.py:142
 msgid "English"
-msgstr ""
+msgstr "English"
 
 #: templates/accounts/login.html:9
 #, fuzzy
@@ -25,7 +25,7 @@ msgstr ""
 msgid "Giriş Yap"
 msgstr "Login"
 
-#: templates/accounts/login.html:17 templates/base.html:55
+#: templates/accounts/login.html:17 templates/base.html:64
 #: templates/core/home.html:9
 msgid "Giriş"
 msgstr "Login"
@@ -39,11 +39,11 @@ msgstr "Organizations"
 #: templates/accounts/org_create.html:14 templates/core/customers_list.html:31
 #: templates/core/suppliers_list.html:31
 msgid "İsim"
-msgstr ""
+msgstr "Name"
 
 #: templates/accounts/org_create.html:17
 msgid "Oluştur"
-msgstr ""
+msgstr "Create"
 
 #: templates/accounts/org_list.html:6
 #, fuzzy
@@ -61,108 +61,217 @@ msgstr "Organizations"
 #: templates/core/category_rules_list.html:31
 #: templates/core/owner_products_list.html:34
 msgid "Aktif"
-msgstr ""
+msgstr "Active"
 
-#: templates/accounts/org_list.html:17 templates/core/categories_list.html:15
+#: templates/accounts/org_list.html:17
 #: templates/core/portal_supplier_products_list.html:13
 msgid "Ad"
-msgstr ""
+msgstr "Name"
 
 #: templates/accounts/org_list.html:19
 msgid "İşlem"
-msgstr ""
+msgstr "Action"
 
 #: templates/accounts/org_list.html:28
+msgid "Ayarlar"
+msgstr "Settings"
+
+#: templates/accounts/org_list.html:29
 msgid "Geç"
+msgstr "Switch"
+
+#: templates/accounts/org_list.html:33
+msgid "Hiç organizasyon yok."
+msgstr "No organizations available."
+
+#: templates/accounts/org_settings.html:9
+msgid "E-posta Ayarları"
+msgstr "Email Settings"
+
+#: templates/accounts/org_settings.html:34
+msgid "SMTP Sunucu"
+msgstr "SMTP Server"
+
+#: templates/accounts/org_settings.html:44
+msgid "Port"
+msgstr "Port"
+
+#: templates/accounts/org_settings.html:58
+msgid "TLS Kullan"
+msgstr "Use TLS"
+
+#: templates/accounts/org_settings.html:68
+msgid "SSL Kullan"
+msgstr "Use SSL"
+
+#: templates/accounts/org_settings.html:74
+msgid "Kullanıcı Adı / E-posta"
 msgstr ""
 
-#: templates/accounts/org_list.html:32
-msgid "Hiç organizasyon yok."
+#: templates/accounts/org_settings.html:84
+msgid "Şifre"
+msgstr "Password"
+
+#: templates/accounts/org_settings.html:95
+msgid "Gönderen E-posta"
 msgstr ""
+
+#: templates/accounts/org_settings.html:106
+#: templates/core/category_form_fields_form.html:22
+#: templates/core/category_rules_form.html:29
+#: templates/core/customer_detail.html:155
+#: templates/core/customer_detail.html:273
+#: templates/core/customer_detail.html:445
+#: templates/core/customers_form.html:18
+#: templates/core/owner_products_form.html:24
+#: templates/core/owner_ticket_form.html:74
+#: templates/core/portal_customer_orders_list.html:37
+#: templates/core/portal_customer_requests_form.html:73
+#: templates/core/supplier_detail.html:509
+#: templates/core/suppliers_form.html:44
+msgid "İptal"
+msgstr "Cancelled"
+
+#: templates/accounts/org_settings.html:108
+#: templates/core/categories_form.html:34
+#: templates/core/category_form_fields_form.html:21
+#: templates/core/category_rules_form.html:28
+#: templates/core/customer_detail.html:448
+#: templates/core/customers_form.html:17
+#: templates/core/owner_products_form.html:23
+#: templates/core/portal_supplier_products_form.html:13
+#: templates/core/supplier_detail.html:512
+#: templates/core/suppliers_form.html:43
+msgid "Kaydet"
+msgstr "Save"
 
 #: templates/accounts/signup.html:9 templates/accounts/signup.html:17
 #: templates/core/home.html:8
 msgid "Kayıt Ol"
 msgstr ""
 
-#: templates/base.html:23
+#: templates/base.html:24
 msgid "Müşteri Portalım"
 msgstr "My Customer Portal"
 
-#: templates/base.html:24 templates/base.html:31
+#: templates/base.html:25 templates/base.html:32
 #: templates/core/portal_customer_products_list.html:40
 #: templates/core/portal_customer_requests_list.html:5
 #: templates/core/portal_supplier.html:10
 msgid "Taleplerim"
 msgstr "My Requests"
 
-#: templates/base.html:25 templates/base.html:32
+#: templates/base.html:26 templates/base.html:33
 #: templates/core/portal_customer_offers_list.html:5
 #: templates/core/portal_supplier_quotes_list.html:5
 msgid "Tekliflerim"
 msgstr "My Quotes"
 
-#: templates/base.html:26 templates/core/portal_customer_orders_list.html:5
+#: templates/base.html:27 templates/core/portal_customer_orders_list.html:5
 msgid "Siparişlerim"
 msgstr "My Orders"
 
-#: templates/base.html:27 templates/base.html:34
+#: templates/base.html:28 templates/base.html:35
 #: templates/core/portal_customer_products_list.html:5
 #: templates/core/portal_supplier_products_list.html:5
 msgid "Ürünlerim"
 msgstr "My Products"
 
-#: templates/base.html:30
+#: templates/base.html:31
 msgid "Tedarikçi Portalım"
 msgstr "My Supplier Portal"
 
-#: templates/base.html:33 templates/base.html:45
+#: templates/base.html:34 templates/base.html:46
+#: templates/core/customer_detail.html:238 templates/core/dashboard.html:185
 #: templates/core/orders_list.html:5
 #: templates/core/portal_supplier_orders_list.html:5
 msgid "Siparişler"
 msgstr "Orders"
 
-#: templates/base.html:37
+#: templates/base.html:38
 msgid "Organizasyonlar"
 msgstr "Organizations"
 
-#: templates/base.html:38
+#: templates/base.html:39 templates/core/dashboard.html:9
 msgid "Dashboard"
-msgstr ""
+msgstr "Dashboard"
 
-#: templates/base.html:39 templates/core/customers_list.html:6
-#: templates/core/owner_products_list.html:24
+#: templates/base.html:40 templates/core/customers_list.html:6
+#: templates/core/dashboard.html:155 templates/core/owner_products_list.html:24
 msgid "Müşteriler"
 msgstr "Customers"
 
-#: templates/base.html:41 templates/core/categories_list.html:3
+#: templates/base.html:42 templates/core/categories_list.html:3
 #: templates/core/categories_list.html:7
 msgid "Kategoriler"
 msgstr "Categories"
 
-#: templates/base.html:42 templates/core/tickets_list.html:3
+#: templates/base.html:43 templates/core/dashboard.html:175
+#: templates/core/tickets_list.html:3
 msgid "Talepler"
 msgstr "Requests"
 
-#: templates/base.html:43 templates/core/ticket_detail_owner.html:4
+#: templates/base.html:44 templates/core/ticket_detail_owner.html:4
 msgid "Teklifler"
 msgstr "Quotes"
 
-#: templates/base.html:44 templates/core/owner_products_list.html:3
+#: templates/base.html:45 templates/core/owner_products_list.html:3
 msgid "Ürünler"
 msgstr "Products"
 
-#: templates/base.html:47 templates/core/categories_list.html:16
-#: templates/core/category_rules_list.html:22
+#: templates/base.html:48 templates/core/categories_list.html:16
+#: templates/core/category_rules_list.html:22 templates/core/dashboard.html:165
 #: templates/core/suppliers_list.html:6
 msgid "Tedarikçiler"
 msgstr "Suppliers"
 
-#: templates/base.html:53
+#: templates/base.html:62
 msgid "Çıkış"
 msgstr "Logout"
 
+#: templates/core/_category_children.html:16
+#: templates/core/categories_list.html:35
+#: templates/core/category_rules_list.html:8
+msgid "Form Alanları"
+msgstr ""
+
+#: templates/core/_category_children.html:17
+#: templates/core/categories_list.html:36
+msgid "Kurallar"
+msgstr ""
+
+#: templates/core/_category_children.html:18
+#: templates/core/categories_list.html:37
+#: templates/core/category_form_fields_list.html:31
+#: templates/core/category_rules_list.html:49
+#: templates/core/customer_detail.html:18 templates/core/customers_list.html:51
+#: templates/core/portal_customer_requests_list.html:33
+#: templates/core/portal_supplier_products_list.html:26
+#: templates/core/supplier_detail.html:18 templates/core/suppliers_list.html:66
+msgid "Düzenle"
+msgstr "Edit"
+
+#: templates/core/_category_children.html:19
+#: templates/core/categories_list.html:38
+#: templates/core/category_form_fields_list.html:32
+#: templates/core/category_rules_list.html:50
+#: templates/core/customers_list.html:52
+#: templates/core/owner_ticket_form.html:34
+#: templates/core/owner_ticket_form.html:64
+#: templates/core/portal_customer_requests_form.html:33
+#: templates/core/portal_customer_requests_form.html:63
+#: templates/core/portal_customer_requests_list.html:34
+#: templates/core/portal_supplier_products_confirm_delete.html:9
+#: templates/core/portal_supplier_products_list.html:27
+#: templates/core/portal_supplier_requests_detail.html:129
+#: templates/core/suppliers_list.html:67
+msgid "Sil"
+msgstr "Delete"
+
 #: templates/core/categories_form.html:4 templates/core/categories_form.html:8
+#: templates/core/categories_list.html:15
+#: templates/core/customer_detail.html:247
+#: templates/core/customer_detail.html:299
 #: templates/core/owner_products_list.html:21
 #: templates/core/owner_ticket_form.html:48
 #: templates/core/portal_customer_offers_list.html:15
@@ -172,6 +281,7 @@ msgstr "Logout"
 #: templates/core/portal_supplier_products_list.html:14
 #: templates/core/portal_supplier_requests_detail.html:12
 #: templates/core/portal_supplier_requests_list.html:15
+#: templates/core/supplier_detail.html:330
 #: templates/core/ticket_detail_owner.html:12
 #: templates/core/tickets_list.html:17
 #, fuzzy
@@ -186,17 +296,11 @@ msgstr "Categories"
 msgid "Listeye Dön"
 msgstr ""
 
-#: templates/core/categories_form.html:18
-#: templates/core/category_form_fields_form.html:21
-#: templates/core/category_rules_form.html:28
-#: templates/core/customers_form.html:17
-#: templates/core/owner_products_form.html:23
-#: templates/core/portal_supplier_products_form.html:13
-#: templates/core/suppliers_form.html:17
-msgid "Kaydet"
+#: templates/core/categories_form.html:19
+msgid "Boş bırakırsanız ana kategori olur"
 msgstr ""
 
-#: templates/core/categories_form.html:19
+#: templates/core/categories_form.html:35
 #: templates/core/category_rules_confirm_delete.html:13
 #: templates/core/customers_confirm_delete.html:9
 #: templates/core/portal_customer_requests_confirm_delete.html:9
@@ -216,46 +320,11 @@ msgstr "Categories"
 #: templates/core/category_rules_list.html:23
 #: templates/core/customers_list.html:35
 #: templates/core/portal_customer_requests_list.html:21
-#: templates/core/suppliers_list.html:35
+#: templates/core/suppliers_list.html:36
 msgid "İşlemler"
 msgstr ""
 
-#: templates/core/categories_list.html:30
-#: templates/core/category_rules_list.html:8
-msgid "Form Alanları"
-msgstr ""
-
-#: templates/core/categories_list.html:31
-msgid "Kurallar"
-msgstr ""
-
-#: templates/core/categories_list.html:32
-#: templates/core/category_form_fields_list.html:31
-#: templates/core/category_rules_list.html:49
-#: templates/core/customers_list.html:47
-#: templates/core/portal_customer_requests_list.html:33
-#: templates/core/portal_supplier_products_list.html:26
-#: templates/core/suppliers_list.html:47
-msgid "Düzenle"
-msgstr ""
-
-#: templates/core/categories_list.html:33
-#: templates/core/category_form_fields_list.html:32
-#: templates/core/category_rules_list.html:50
-#: templates/core/customers_list.html:48
-#: templates/core/owner_ticket_form.html:34
-#: templates/core/owner_ticket_form.html:64
-#: templates/core/portal_customer_requests_form.html:33
-#: templates/core/portal_customer_requests_form.html:63
-#: templates/core/portal_customer_requests_list.html:34
-#: templates/core/portal_supplier_products_confirm_delete.html:9
-#: templates/core/portal_supplier_products_list.html:27
-#: templates/core/portal_supplier_requests_detail.html:117
-#: templates/core/suppliers_list.html:48
-msgid "Sil"
-msgstr ""
-
-#: templates/core/categories_list.html:37
+#: templates/core/categories_list.html:43
 msgid "Henüz kategori yok."
 msgstr ""
 
@@ -265,21 +334,12 @@ msgstr ""
 
 #: templates/core/category_form_fields_form.html:8
 #: templates/core/category_rules_form.html:7
+#: templates/core/customer_detail.html:22
 #: templates/core/portal_supplier_products_form.html:14
-#: templates/core/ticket_detail_owner.html:112
+#: templates/core/supplier_detail.html:22
+#: templates/core/ticket_detail_owner.html:164
 msgid "Geri"
-msgstr ""
-
-#: templates/core/category_form_fields_form.html:22
-#: templates/core/category_rules_form.html:29
-#: templates/core/customers_form.html:18
-#: templates/core/owner_products_form.html:24
-#: templates/core/owner_ticket_form.html:74
-#: templates/core/portal_customer_orders_list.html:37
-#: templates/core/portal_customer_requests_form.html:73
-#: templates/core/suppliers_form.html:18
-msgid "İptal"
-msgstr ""
+msgstr "Back"
 
 #: templates/core/category_form_fields_list.html:6
 msgid "Kategori Form Alanları"
@@ -313,11 +373,11 @@ msgstr ""
 
 #: templates/core/category_form_fields_list.html:29
 msgid "Evet"
-msgstr ""
+msgstr "Yes"
 
 #: templates/core/category_form_fields_list.html:29
 msgid "Hayır"
-msgstr ""
+msgstr "No"
 
 #: templates/core/category_form_fields_list.html:36
 msgid "Alan yok"
@@ -352,7 +412,9 @@ msgid "Yeni Kural"
 msgstr ""
 
 #: templates/core/category_rules_list.html:19
-#: templates/core/order_detail.html:14 templates/core/orders_list.html:19
+#: templates/core/customer_detail.html:249
+#: templates/core/customer_detail.html:302 templates/core/order_detail.html:14
+#: templates/core/orders_list.html:19
 #: templates/core/owner_products_list.html:23
 #: templates/core/portal_customer_offers_list.html:17
 #: templates/core/portal_customer_orders_list.html:19
@@ -360,10 +422,12 @@ msgstr ""
 #: templates/core/portal_supplier_orders_list.html:17
 #: templates/core/portal_supplier_requests_detail.html:13
 #: templates/core/portal_supplier_requests_list.html:16
+#: templates/core/supplier_detail.html:279
+#: templates/core/supplier_detail.html:332
 #: templates/core/ticket_detail_owner.html:14
 #: templates/core/tickets_list.html:20
 msgid "Durum"
-msgstr ""
+msgstr "Status"
 
 #: templates/core/category_rules_list.html:20
 msgid "Adet Aralığı"
@@ -376,7 +440,7 @@ msgstr ""
 #: templates/core/category_rules_list.html:31
 #: templates/core/owner_products_list.html:34
 msgid "Pasif"
-msgstr ""
+msgstr "Inactive"
 
 #: templates/core/category_rules_list.html:34
 msgid "ve"
@@ -388,6 +452,213 @@ msgstr ""
 
 #: templates/core/category_rules_list.html:61
 msgid "Alan anahtarları"
+msgstr ""
+
+#: templates/core/customer_detail.html:15
+#: templates/core/supplier_detail.html:15
+msgid "Değerlendirme Ekle"
+msgstr "Add Review"
+
+#: templates/core/customer_detail.html:30
+#: templates/core/supplier_detail.html:30
+msgid "Email:"
+msgstr ""
+
+#: templates/core/customer_detail.html:36
+#: templates/core/supplier_detail.html:36
+msgid "Telefon:"
+msgstr ""
+
+#: templates/core/customer_detail.html:42
+#: templates/core/supplier_detail.html:42
+msgid "Kayıt Tarihi:"
+msgstr ""
+
+#: templates/core/customer_detail.html:58
+#, fuzzy
+#| msgid "Müşteriler"
+msgid "Müşteri Skoru"
+msgstr "Customers"
+
+#: templates/core/customer_detail.html:82
+#, fuzzy
+#| msgid "Müşteri Portalım"
+msgid "Müşteri Performansı"
+msgstr "My Customer Portal"
+
+#: templates/core/customer_detail.html:91
+msgid "Dönüşüm Oranı"
+msgstr "Conversion Rate"
+
+#: templates/core/customer_detail.html:105
+msgid "İptal Oranı"
+msgstr "Cancellation Rate"
+
+#: templates/core/customer_detail.html:119
+msgid "Yanıt Hızı"
+msgstr "Response Speed"
+
+#: templates/core/customer_detail.html:133
+msgid "Toplam Harcama"
+msgstr "Total Spending"
+
+#: templates/core/customer_detail.html:147
+#: templates/core/customer_detail.html:211
+#, fuzzy
+#| msgid "Talepler"
+msgid "Toplam Talep"
+msgstr "Requests"
+
+#: templates/core/customer_detail.html:151
+#: templates/core/feedback_survey.html:16 templates/core/order_detail.html:4
+#, fuzzy
+#| msgid "Siparişler"
+msgid "Sipariş"
+msgstr "Orders"
+
+#: templates/core/customer_detail.html:170
+#: templates/core/supplier_detail.html:198
+msgid "Yönetici Değerlendirmeleri"
+msgstr "Manager Reviews"
+
+#: templates/core/customer_detail.html:219
+msgid "Siparişe Dönüşen"
+msgstr "Converted to Order"
+
+#: templates/core/customer_detail.html:227
+#, fuzzy
+#| msgid "Teklifler"
+msgid "Alınan Teklif"
+msgstr "Quotes"
+
+#: templates/core/customer_detail.html:246
+#: templates/core/customer_detail.html:298
+#: templates/core/supplier_detail.html:274
+#: templates/core/supplier_detail.html:328
+msgid "Ticket #"
+msgstr ""
+
+#: templates/core/customer_detail.html:248 templates/core/dashboard.html:34
+#: templates/core/orders_list.html:18
+#: templates/core/owner_products_list.html:20
+#: templates/core/portal_customer_orders_list.html:17
+#: templates/core/suppliers_form.html:7
+#, fuzzy
+#| msgid "Tedarikçiler"
+msgid "Tedarikçi"
+msgstr "Suppliers"
+
+#: templates/core/customer_detail.html:250
+#: templates/core/customer_detail.html:303 templates/core/orders_list.html:21
+#: templates/core/portal_customer_orders_list.html:15
+#: templates/core/portal_supplier_quotes_list.html:18
+#: templates/core/supplier_detail.html:335
+msgid "Tarih"
+msgstr "Date"
+
+#: templates/core/customer_detail.html:265
+msgid "Bekliyor"
+msgstr "Pending"
+
+#: templates/core/customer_detail.html:267
+msgid "Onaylandı"
+msgstr "Confirmed"
+
+#: templates/core/customer_detail.html:269
+msgid "Gönderildi"
+msgstr "Sent"
+
+#: templates/core/customer_detail.html:271 templates/core/order_detail.html:81
+#: templates/core/portal_customer_orders_list.html:36
+#: templates/core/supplier_detail.html:300
+#: templates/core/supplier_detail.html:353
+msgid "Tamamlandı"
+msgstr "Completed"
+
+#: templates/core/customer_detail.html:290 templates/core/tickets_list.html:7
+#, fuzzy
+#| msgid "Talepler"
+msgid "Tüm Talepler"
+msgstr "Requests"
+
+#: templates/core/customer_detail.html:300
+#: templates/core/portal_customer_requests_list.html:17
+#: templates/core/portal_supplier_requests_list.html:14
+#: templates/core/supplier_detail.html:276
+#: templates/core/supplier_detail.html:331 templates/core/tickets_list.html:16
+msgid "Başlık"
+msgstr "Title"
+
+#: templates/core/customer_detail.html:301
+#: templates/core/portal_customer_offers_list.html:16
+msgid "Teklif Sayısı"
+msgstr ""
+
+#: templates/core/customer_detail.html:319
+#, fuzzy
+#| msgid "Siparişlerim"
+msgid "Sipariş Verildi"
+msgstr "My Orders"
+
+#: templates/core/customer_detail.html:321
+#, fuzzy
+#| msgid "Teklifler"
+msgid "Teklif Alındı"
+msgstr "Quotes"
+
+#: templates/core/customer_detail.html:323
+#: templates/core/supplier_detail.html:357
+#: templates/core/supplier_detail.html:377
+#, fuzzy
+#| msgid "Teklifler"
+msgid "Teklif Bekleniyor"
+msgstr "Quotes"
+
+#: templates/core/customer_detail.html:331
+msgid "Bu müşteriye henüz talep oluşturulmamış."
+msgstr ""
+
+#: templates/core/customer_detail.html:353
+#, fuzzy
+#| msgid "Müşteriler"
+msgid "Müşteriyi Değerlendir"
+msgstr "Customers"
+
+#: templates/core/customer_detail.html:362
+#: templates/core/supplier_detail.html:426
+msgid "Güvenilirlik"
+msgstr "Reliability"
+
+#: templates/core/customer_detail.html:377 templates/core/dashboard.html:108
+#: templates/core/feedback_thank_you.html:33
+#: templates/core/supplier_detail.html:147
+#: templates/core/supplier_detail.html:441
+msgid "İletişim"
+msgstr "Communication"
+
+#: templates/core/customer_detail.html:392
+#: templates/core/supplier_detail.html:456
+msgid "Kalite"
+msgstr "Quality"
+
+#: templates/core/customer_detail.html:407
+#: templates/core/supplier_detail.html:471
+msgid "Ödeme"
+msgstr "Payment"
+
+#: templates/core/customer_detail.html:422
+#: templates/core/supplier_detail.html:486
+msgid "Fiyatlandırma"
+msgstr "Pricing"
+
+#: templates/core/customer_detail.html:435
+#: templates/core/supplier_detail.html:499
+msgid "Lütfen en az bir kategori için puan verin"
+msgstr ""
+
+#: templates/core/customer_detail.html:439
+#: templates/core/supplier_detail.html:503
+msgid "Yorum (Opsiyonel)"
 msgstr ""
 
 #: templates/core/customers_confirm_delete.html:4
@@ -409,7 +680,8 @@ msgid "Evet, sil"
 msgstr ""
 
 #: templates/core/customers_form.html:7 templates/core/order_detail.html:11
-#: templates/core/orders_list.html:17
+#: templates/core/orders_list.html:17 templates/core/supplier_detail.html:275
+#: templates/core/supplier_detail.html:329
 #: templates/core/ticket_detail_owner.html:13
 #: templates/core/tickets_list.html:18
 #, fuzzy
@@ -435,29 +707,196 @@ msgstr ""
 #: templates/core/owner_products_list.html:10
 #: templates/core/suppliers_list.html:23
 msgid "Ara"
-msgstr ""
+msgstr "Search"
 
 #: templates/core/customers_list.html:32 templates/core/portal_customer.html:7
 #: templates/core/portal_supplier.html:7 templates/core/suppliers_list.html:32
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: templates/core/customers_list.html:33 templates/core/portal_customer.html:8
 #: templates/core/portal_supplier.html:8 templates/core/suppliers_list.html:33
 msgid "Telefon"
-msgstr ""
+msgstr "Phone"
 
 #: templates/core/customers_list.html:34
 #: templates/core/portal_customer_requests_list.html:20
 #: templates/core/portal_supplier_orders_list.html:18
 #: templates/core/portal_supplier_requests_detail.html:14
 #: templates/core/portal_supplier_requests_list.html:17
-#: templates/core/suppliers_list.html:34 templates/core/tickets_list.html:21
+#: templates/core/suppliers_list.html:35 templates/core/tickets_list.html:21
 msgid "Oluşturuldu"
 msgstr ""
 
-#: templates/core/customers_list.html:53 templates/core/suppliers_list.html:53
+#: templates/core/customers_list.html:57 templates/core/suppliers_list.html:72
 msgid "Kayıt yok"
+msgstr ""
+
+#: templates/core/dashboard.html:25
+msgid "En İyi Performans Gösteren Tedarikçiler"
+msgstr ""
+
+#: templates/core/dashboard.html:35
+msgid "Genel Skor"
+msgstr ""
+
+#: templates/core/dashboard.html:36 templates/core/supplier_detail.html:91
+msgid "Kazanma Oranı"
+msgstr ""
+
+#: templates/core/dashboard.html:37 templates/core/supplier_detail.html:119
+msgid "Zamanında Teslimat"
+msgstr ""
+
+#: templates/core/dashboard.html:38
+#, fuzzy
+#| msgid "Müşteriler"
+msgid "Müşteri Memnuniyeti"
+msgstr "Customers"
+
+#: templates/core/dashboard.html:67 templates/core/orders_list.html:41
+#: templates/core/portal_customer_offers_list.html:29
+#: templates/core/portal_supplier_orders_list.html:41
+msgid "Detay"
+msgstr "Detail"
+
+#: templates/core/dashboard.html:88
+msgid "Son Müşteri Değerlendirmeleri"
+msgstr ""
+
+#: templates/core/dashboard.html:100 templates/core/owner_products_list.html:19
+#: templates/core/portal_customer_products_list.html:17
+#, fuzzy
+#| msgid "Ürünler"
+msgid "Ürün"
+msgstr "Products"
+
+#: templates/core/dashboard.html:116 templates/core/feedback_thank_you.html:41
+msgid "Teslimat"
+msgstr "Delivery"
+
+#: templates/core/dashboard.html:124
+msgid "Genel"
+msgstr ""
+
+#: templates/core/dashboard.html:194
+msgid "Hiç organizasyon seçili değil."
+msgstr ""
+
+#: templates/core/dashboard.html:194
+msgid "Seç"
+msgstr "Select"
+
+#: templates/core/feedback_already_submitted.html:13
+msgid "Teşekkürler!"
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:15
+msgid "Bu sipariş için değerlendirmeniz daha önce alınmıştır."
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:19
+msgid "Değerlendirmeniz:"
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:22
+#, fuzzy
+#| msgid "Ürünlerim"
+msgid "Ürün Kalitesi:"
+msgstr "My Products"
+
+#: templates/core/feedback_already_submitted.html:30
+msgid "İletişim:"
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:38
+msgid "Teslimat:"
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:46
+msgid "Genel:"
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:56
+msgid "Yorumunuz:"
+msgstr ""
+
+#: templates/core/feedback_already_submitted.html:63
+msgid "Değerlendirme tarihi:"
+msgstr ""
+
+#: templates/core/feedback_survey.html:11
+#, fuzzy
+#| msgid "Siparişlerim"
+msgid "Siparişinizi Değerlendirin"
+msgstr "My Orders"
+
+#: templates/core/feedback_survey.html:17
+#, fuzzy
+#| msgid "Tedarikçiler"
+msgid "Tedarikçi:"
+msgstr "Suppliers"
+
+#: templates/core/feedback_survey.html:18
+msgid "Tarih:"
+msgstr ""
+
+#: templates/core/feedback_survey.html:21
+msgid ""
+"Memnuniyetiniz bizim için çok önemli! Lütfen siparişinizi değerlendirin:"
+msgstr ""
+
+#: templates/core/feedback_survey.html:27
+#: templates/core/feedback_thank_you.html:25
+#: templates/core/supplier_detail.html:133
+#, fuzzy
+#| msgid "Ürünlerim"
+msgid "Ürün Kalitesi"
+msgstr "My Products"
+
+#: templates/core/feedback_survey.html:45
+msgid "İletişim Kalitesi"
+msgstr ""
+
+#: templates/core/feedback_survey.html:63
+msgid "Teslimat Süresi"
+msgstr ""
+
+#: templates/core/feedback_survey.html:81
+#: templates/core/feedback_thank_you.html:49
+msgid "Genel Memnuniyet"
+msgstr ""
+
+#: templates/core/feedback_survey.html:99
+msgid "Yorumunuz (Opsiyonel)"
+msgstr ""
+
+#: templates/core/feedback_survey.html:105
+msgid "Değerlendirmeyi Gönder"
+msgstr ""
+
+#: templates/core/feedback_thank_you.html:13
+msgid "Değerlendirmeniz Alındı!"
+msgstr ""
+
+#: templates/core/feedback_thank_you.html:15
+msgid "Geri bildiriminiz için çok teşekkür ederiz."
+msgstr ""
+
+#: templates/core/feedback_thank_you.html:18
+msgid "Görüşleriniz hizmet kalitemizi artırmamıza yardımcı oluyor."
+msgstr ""
+
+#: templates/core/feedback_thank_you.html:22
+msgid "Değerlendirme Özeti"
+msgstr ""
+
+#: templates/core/feedback_thank_you.html:59
+msgid "Yorumunuz"
+msgstr ""
+
+#: templates/core/feedback_thank_you.html:70
+msgid "Bu pencereyi kapatabilirsiniz."
 msgstr ""
 
 #: templates/core/home.html:6
@@ -467,12 +906,6 @@ msgstr ""
 #: templates/core/home.html:11
 msgid "Yönetim için <a href=\"/admin/\">Admin</a> panelini kullanabilirsiniz."
 msgstr ""
-
-#: templates/core/order_detail.html:4
-#, fuzzy
-#| msgid "Siparişler"
-msgid "Sipariş"
-msgstr "Orders"
 
 #: templates/core/order_detail.html:10 templates/core/orders_list.html:16
 #: templates/core/portal_customer_offers_list.html:14
@@ -488,10 +921,10 @@ msgstr "Requests"
 
 #: templates/core/order_detail.html:15 templates/core/orders_list.html:20
 msgid "Toplam"
-msgstr ""
+msgstr "Total"
 
 #: templates/core/order_detail.html:18
-#: templates/core/ticket_detail_owner.html:63
+#: templates/core/ticket_detail_owner.html:83
 #: templates/core/tickets_list.html:19
 #, fuzzy
 #| msgid "Teklifler"
@@ -516,6 +949,8 @@ msgstr ""
 #: templates/core/portal_customer_products_list.html:20
 #: templates/core/portal_customer_requests_form.html:55
 #: templates/core/portal_supplier_requests_detail.html:17
+#: templates/core/ticket_detail_owner.html:16
+#: templates/core/ticket_detail_owner.html:143
 msgid "Adet"
 msgstr ""
 
@@ -530,7 +965,6 @@ msgid "Sahip Marjı"
 msgstr ""
 
 #: templates/core/order_detail.html:34
-#: templates/core/ticket_detail_owner.html:96
 msgid "Satış Tutarı"
 msgstr ""
 
@@ -556,11 +990,6 @@ msgstr ""
 msgid "Bu siparişi tamamlamak istediğinize emin misiniz?"
 msgstr ""
 
-#: templates/core/order_detail.html:81
-#: templates/core/portal_customer_orders_list.html:36
-msgid "Tamamlandı"
-msgstr ""
-
 #: templates/core/order_detail.html:83
 msgid "Bu siparişi iptal etmek istediğinize emin misiniz?"
 msgstr ""
@@ -571,27 +1000,6 @@ msgstr ""
 
 #: templates/core/orders_list.html:7
 msgid "Ara: talep, müşteri, tedarikçi"
-msgstr ""
-
-#: templates/core/orders_list.html:18
-#: templates/core/owner_products_list.html:20
-#: templates/core/portal_customer_orders_list.html:17
-#: templates/core/suppliers_form.html:7
-#, fuzzy
-#| msgid "Tedarikçiler"
-msgid "Tedarikçi"
-msgstr "Suppliers"
-
-#: templates/core/orders_list.html:21
-#: templates/core/portal_customer_orders_list.html:15
-#: templates/core/portal_supplier_quotes_list.html:18
-msgid "Tarih"
-msgstr ""
-
-#: templates/core/orders_list.html:41
-#: templates/core/portal_customer_offers_list.html:29
-#: templates/core/portal_supplier_orders_list.html:41
-msgid "Detay"
 msgstr ""
 
 #: templates/core/orders_list.html:44
@@ -623,13 +1031,6 @@ msgstr "Suppliers"
 #: templates/core/owner_products_list.html:9
 msgid "Ara (ürün/tedarikçi)"
 msgstr ""
-
-#: templates/core/owner_products_list.html:19
-#: templates/core/portal_customer_products_list.html:17
-#, fuzzy
-#| msgid "Ürünler"
-msgid "Ürün"
-msgstr "Products"
 
 #: templates/core/owner_products_list.html:22
 msgid "Liste Fiyatı"
@@ -665,14 +1066,15 @@ msgstr ""
 #: templates/core/portal_customer_products_list.html:19
 #: templates/core/portal_customer_requests_form.html:59
 #: templates/core/portal_supplier_requests_detail.html:18
-#: templates/core/ticket_detail_owner.html:92
+#: templates/core/ticket_detail_owner.html:21
+#: templates/core/ticket_detail_owner.html:141
 msgid "Açıklama"
-msgstr ""
+msgstr "Description"
 
 #: templates/core/owner_ticket_form.html:73
 #: templates/core/portal_customer_requests_form.html:72
 msgid "Gönder"
-msgstr ""
+msgstr "Send"
 
 #: templates/core/owner_ticket_form.html:123
 #: templates/core/portal_customer_requests_form.html:122
@@ -714,22 +1116,19 @@ msgstr ""
 msgid "Ara..."
 msgstr ""
 
-#: templates/core/portal_customer_offers_list.html:16
-msgid "Teklif Sayısı"
-msgstr ""
-
 #: templates/core/portal_customer_offers_list.html:32
 msgid "Teklif bulunan talep yok."
 msgstr ""
 
 #: templates/core/portal_customer_orders_list.html:18
 #: templates/core/portal_supplier_quotes_list.html:17
+#: templates/core/supplier_detail.html:277
 msgid "Tutar"
 msgstr ""
 
 #: templates/core/portal_customer_orders_list.html:34
 msgid "Yeni"
-msgstr ""
+msgstr "New"
 
 #: templates/core/portal_customer_orders_list.html:35
 msgid "İşlemde"
@@ -768,12 +1167,6 @@ msgstr ""
 msgid "Yeni Talep"
 msgstr ""
 
-#: templates/core/portal_customer_requests_list.html:17
-#: templates/core/portal_supplier_requests_list.html:14
-#: templates/core/tickets_list.html:16
-msgid "Başlık"
-msgstr ""
-
 #: templates/core/portal_customer_requests_list.html:38
 #: templates/core/tickets_list.html:36
 msgid "Talep yok"
@@ -809,7 +1202,7 @@ msgstr ""
 
 #: templates/core/portal_supplier_orders_list.html:33
 msgid "Bugün"
-msgstr ""
+msgstr "Today"
 
 #: templates/core/portal_supplier_orders_list.html:44
 #, fuzzy
@@ -824,7 +1217,7 @@ msgstr ""
 
 #: templates/core/portal_supplier_products_list.html:15
 msgid "Fiyat"
-msgstr ""
+msgstr "Price"
 
 #: templates/core/portal_supplier_quotes_list.html:30
 #, fuzzy
@@ -833,12 +1226,12 @@ msgid "Talebe Git"
 msgstr "My Requests"
 
 #: templates/core/portal_supplier_quotes_list.html:34
-#: templates/core/ticket_detail_owner.html:49
+#: templates/core/ticket_detail_owner.html:58
 msgid "Henüz teklif yok."
 msgstr ""
 
 #: templates/core/portal_supplier_requests_detail.html:22
-#: templates/core/ticket_detail_owner.html:18
+#: templates/core/ticket_detail_owner.html:27
 msgid "Form Yanıtları"
 msgstr ""
 
@@ -864,29 +1257,33 @@ msgstr ""
 msgid "Ürün/Hizmet Kalemleri"
 msgstr ""
 
-#: templates/core/portal_supplier_requests_detail.html:59
+#: templates/core/portal_supplier_requests_detail.html:60
 msgid "Ürününüz listede yok mu?"
 msgstr ""
 
-#: templates/core/portal_supplier_requests_detail.html:59
+#: templates/core/portal_supplier_requests_detail.html:60
 msgid "Yeni Ürün oluştur"
 msgstr ""
 
-#: templates/core/portal_supplier_requests_detail.html:60
+#: templates/core/portal_supplier_requests_detail.html:62
+msgid "Basit usul tedarikçi - Sadece birim fiyat, adet ve açıklama giriniz"
+msgstr ""
+
+#: templates/core/portal_supplier_requests_detail.html:64
 msgid "Kalem Ekle"
 msgstr ""
 
-#: templates/core/portal_supplier_requests_detail.html:83
+#: templates/core/portal_supplier_requests_detail.html:95
 msgid "Para Birimi ve Açıklama"
 msgstr ""
 
-#: templates/core/portal_supplier_requests_detail.html:89
+#: templates/core/portal_supplier_requests_detail.html:101
 #, fuzzy
 #| msgid "Teklifler"
 msgid "Teklif Gönder"
 msgstr "Quotes"
 
-#: templates/core/portal_supplier_requests_detail.html:90
+#: templates/core/portal_supplier_requests_detail.html:102
 #, fuzzy
 #| msgid "Talepler"
 msgid "Taleplere dön"
@@ -899,6 +1296,106 @@ msgstr ""
 #: templates/core/portal_supplier_requests_list.html:30
 msgid "Size atanan talep yok"
 msgstr ""
+
+#: templates/core/supplier_detail.html:58
+msgid "Toplam Skor"
+msgstr ""
+
+#: templates/core/supplier_detail.html:82
+msgid "Performans Metrikleri"
+msgstr ""
+
+#: templates/core/supplier_detail.html:105
+#, fuzzy
+#| msgid "Teklifler"
+msgid "Teklif Hızı"
+msgstr "Quotes"
+
+#: templates/core/supplier_detail.html:161
+msgid "Memnuniyet"
+msgstr ""
+
+#: templates/core/supplier_detail.html:175
+#, fuzzy
+#| msgid "Siparişler"
+msgid "Toplam Sipariş"
+msgstr "Orders"
+
+#: templates/core/supplier_detail.html:179
+#, fuzzy
+#| msgid "Teklifler"
+msgid "Teklif Gönderildi"
+msgstr "Quotes"
+
+#: templates/core/supplier_detail.html:183
+msgid "Teslimat Yapıldı"
+msgstr ""
+
+#: templates/core/supplier_detail.html:239
+msgid "Toplam Gönderilen İş"
+msgstr ""
+
+#: templates/core/supplier_detail.html:247
+#, fuzzy
+#| msgid "Tekliflerim"
+msgid "Teklif Verilen İş"
+msgstr "My Quotes"
+
+#: templates/core/supplier_detail.html:255
+msgid "Teklif Bekleyen İş"
+msgstr ""
+
+#: templates/core/supplier_detail.html:266
+msgid "Kabul Edilen Teklifler (Siparişler)"
+msgstr ""
+
+#: templates/core/supplier_detail.html:278
+#, fuzzy
+#| msgid "Tekliflerim"
+msgid "Teklif Tarihi"
+msgstr "My Quotes"
+
+#: templates/core/supplier_detail.html:302
+#: templates/core/supplier_detail.html:355
+msgid "Devam Ediyor"
+msgstr ""
+
+#: templates/core/supplier_detail.html:320
+msgid "Gönderilen Tüm İşler"
+msgstr ""
+
+#: templates/core/supplier_detail.html:333
+#, fuzzy
+#| msgid "Tekliflerim"
+msgid "Teklif Durumu"
+msgstr "My Quotes"
+
+#: templates/core/supplier_detail.html:334
+#, fuzzy
+#| msgid "Tedarikçi Portalım"
+msgid "Teklif Tutarı"
+msgstr "My Supplier Portal"
+
+#: templates/core/supplier_detail.html:359
+#: templates/core/supplier_detail.html:372
+#, fuzzy
+#| msgid "Tekliflerim"
+msgid "Teklif Verildi"
+msgstr "My Quotes"
+
+#: templates/core/supplier_detail.html:368
+msgid "Kabul Edildi"
+msgstr ""
+
+#: templates/core/supplier_detail.html:395
+msgid "Bu tedarikçiye henüz iş gönderilmemiş."
+msgstr ""
+
+#: templates/core/supplier_detail.html:417
+#, fuzzy
+#| msgid "Tedarikçiler"
+msgid "Tedarikçiyi Değerlendir"
+msgstr "Suppliers"
 
 #: templates/core/suppliers_confirm_delete.html:4
 #, fuzzy
@@ -919,78 +1416,92 @@ msgstr ""
 msgid "Yeni Tedarikçi"
 msgstr "Suppliers"
 
-#: templates/core/ticket_detail_owner.html:30
+#: templates/core/suppliers_list.html:34
+msgid "Skor"
+msgstr ""
+
+#: templates/core/ticket_detail_owner.html:39
 #, fuzzy
 #| msgid "Tedarikçiler"
 msgid "Tedarikçi Teklifleri"
 msgstr "Suppliers"
 
-#: templates/core/ticket_detail_owner.html:35
+#: templates/core/ticket_detail_owner.html:44
 msgid "seçili"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:39
+#: templates/core/ticket_detail_owner.html:48
 msgid "Kalemler"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:56
+#: templates/core/ticket_detail_owner.html:64
+#, fuzzy
+#| msgid "Teklifler"
+msgid "Teklif Beklenenler"
+msgstr "Quotes"
+
+#: templates/core/ticket_detail_owner.html:76
 #, fuzzy
 #| msgid "Müşteri Portalım"
 msgid "Müşteri Yorumları"
 msgstr "My Customer Portal"
 
-#: templates/core/ticket_detail_owner.html:63
+#: templates/core/ticket_detail_owner.html:83
 msgid "Anonim"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:70
+#: templates/core/ticket_detail_owner.html:90
 msgid "Yorum yok."
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:74
+#: templates/core/ticket_detail_owner.html:94
 msgid "Teklifli Taleplere Dön"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:80
+#: templates/core/ticket_detail_owner.html:100
+#, fuzzy
+#| msgid "Tedarikçi Portalım"
+msgid "Tedarikçi Email Yanıtları"
+msgstr "My Supplier Portal"
+
+#: templates/core/ticket_detail_owner.html:126
 msgid "Müşteriye Sunulacak Fiyat"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:87
+#: templates/core/ticket_detail_owner.html:133
 msgid "Kalem Bazlı Yüzde Kar"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:93
-#, fuzzy
-#| msgid "Tedarikçi Portalım"
-msgid "Tedarikçi Tutarı"
-msgstr "My Supplier Portal"
+#: templates/core/ticket_detail_owner.html:142
+msgid "Birim Alış"
+msgstr ""
 
-#: templates/core/ticket_detail_owner.html:94
+#: templates/core/ticket_detail_owner.html:144
+msgid "Toplam Alış"
+msgstr ""
+
+#: templates/core/ticket_detail_owner.html:145
+#: templates/core/ticket_detail_owner.html:146
 msgid "Kar"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:95
-msgid "Kar (₺)"
+#: templates/core/ticket_detail_owner.html:147
+msgid "Birim Satış"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:102
+#: templates/core/ticket_detail_owner.html:148
+#: templates/core/ticket_detail_owner.html:154
 msgid "Toplam Satış"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:111
+#: templates/core/ticket_detail_owner.html:163
 msgid "Teklifi Seç ve Kaydet"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:152
+#: templates/core/ticket_detail_owner.html:250
 msgid "Seçilen tedarikçi"
 msgstr ""
 
-#: templates/core/ticket_detail_owner.html:152
+#: templates/core/ticket_detail_owner.html:250
 msgid "Ortalama kalem tutarı"
 msgstr ""
-
-#: templates/core/tickets_list.html:7
-#, fuzzy
-#| msgid "Talepler"
-msgid "Tüm Talepler"
-msgstr "Requests"
