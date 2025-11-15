@@ -160,20 +160,27 @@ let currentConversationId = null;
 
 // New chat button
 document.getElementById('newChatBtn').addEventListener('click', function() {
-    fetch('/ai/chat/', {
+    fetch('{% url "ai_assistant:chat" %}', {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             currentConversationId = data.conversation_id;
             clearMessages();
             location.reload();
         }
+    })
+    .catch(error => {
+        console.error('Error creating conversation:', error);
+        alert('Failed to create new conversation');
     });
 });
 
@@ -201,19 +208,26 @@ document.getElementById('chatForm').addEventListener('submit', function(e) {
     
     if (!currentConversationId) {
         // Create new conversation first
-        fetch('/ai/chat/', {
+        fetch('{% url "ai_assistant:chat" %}', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 currentConversationId = data.conversation_id;
                 sendMessage(message);
             }
+        })
+        .catch(error => {
+            console.error('Error creating conversation:', error);
+            alert('Failed to create conversation');
         });
     } else {
         sendMessage(message);
@@ -230,7 +244,8 @@ function sendMessage(message) {
     showTypingIndicator();
     
     // Send to server
-    fetch(`/ai/chat/${currentConversationId}/message/`, {
+    const url = `{% url "ai_assistant:send_message" 0 %}`.replace('0', currentConversationId);
+    fetch(url, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -238,7 +253,10 @@ function sendMessage(message) {
         },
         body: JSON.stringify({ message: message })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
     .then(data => {
         hideTypingIndicator();
         
@@ -258,6 +276,7 @@ function sendMessage(message) {
     .catch(error => {
         hideTypingIndicator();
         appendMessage('assistant', 'Error: ' + error.message);
+        console.error('Send message error:', error);
     });
 }
 
@@ -265,8 +284,12 @@ function loadConversation(convId) {
     currentConversationId = convId;
     clearMessages();
     
-    fetch(`/ai/chat/${convId}/`)
-    .then(response => response.json())
+    const url = `{% url "ai_assistant:get_conversation" 0 %}`.replace('0', convId);
+    fetch(url)
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             document.getElementById('chatTitle').textContent = data.conversation.title;
@@ -274,6 +297,9 @@ function loadConversation(convId) {
                 appendMessage(msg.role, msg.content);
             });
         }
+    })
+    .catch(error => {
+        console.error('Load conversation error:', error);
     });
 }
 
