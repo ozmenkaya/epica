@@ -326,10 +326,10 @@ def ai_stats(request):
     else:
         feedback_rate = 0
     
-    # Function usage stats
+    # Function usage stats - group by action_type
     function_stats = AIAction.objects.filter(
         message__conversation__organization=organization
-    ).values('function_name').annotate(
+    ).values('action_type').annotate(
         count=Count('id')
     ).order_by('-count')[:10]
     
