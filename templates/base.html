@@ -12,7 +12,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-  <a class="navbar-brand" href="/">Epica</a>
+  <a class="navbar-brand" href="{% url 'home' %}">Epica</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav" aria-controls="topnav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -21,31 +21,31 @@
             {% if request.user.is_authenticated %}
               {% if request.user.customer_profile or request.user.supplier_profile %}
                 {% if request.user.customer_profile %}
-                  <li class="nav-item"><a class="nav-link" href="/portal/customer/">{% trans "Müşteri Portalım" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'customer_portal' %}">{% trans "Müşteri Portalım" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'customer_requests_list' %}">{% trans "Taleplerim" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'customer_offers_list' %}">{% trans "Tekliflerim" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'customer_orders_list' %}">{% trans "Siparişlerim" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'customer_products_list' %}">{% trans "Ürünlerim" %}</a></li>
                 {% endif %}
                 {% if request.user.supplier_profile %}
-                  <li class="nav-item"><a class="nav-link" href="/portal/supplier/">{% trans "Tedarikçi Portalım" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'supplier_portal' %}">{% trans "Tedarikçi Portalım" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'supplier_requests_list' %}">{% trans "Taleplerim" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'supplier_quotes_list' %}">{% trans "Tekliflerim" %}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'supplier_orders_list' %}">{% trans "Siparişler" %}</a></li>
-                  <li class="nav-item"><a class="nav-link" href="/portal/supplier/products/">{% trans "Ürünlerim" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'supplier_products_list' %}">{% trans "Ürünlerim" %}</a></li>
                 {% endif %}
               {% else %}
-                <li class="nav-item"><a class="nav-link" href="/accounts/orgs/">{% trans "Organizasyonlar" %}</a></li>
-                <li class="nav-item"><a class="nav-link" href="/dashboard/">{% trans "Dashboard" %}</a></li>
-                <li class="nav-item"><a class="nav-link" href="/customers/">{% trans "Müşteriler" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'org_list' %}">{% trans "Organizasyonlar" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'customers_list' %}">{% trans "Müşteriler" %}</a></li>
                 {% if tenant_is_owner %}
-                  <li class="nav-item"><a class="nav-link" href="/categories/">{% trans "Kategoriler" %}</a></li>
-                  <li class="nav-item"><a class="nav-link" href="/tickets/">{% trans "Talepler" %}</a></li>
-                  <li class="nav-item"><a class="nav-link" href="/offers/">{% trans "Teklifler" %}</a></li>
-                  <li class="nav-item"><a class="nav-link" href="/products/">{% trans "Ürünler" %}</a></li>
-                  <li class="nav-item"><a class="nav-link" href="/orders/">{% trans "Siparişler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'categories_list' %}">{% trans "Kategoriler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'tickets_list' %}">{% trans "Talepler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'offers_list' %}">{% trans "Teklifler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'owner_products_list' %}">{% trans "Ürünler" %}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'orders_list' %}">{% trans "Siparişler" %}</a></li>
                 {% endif %}
-                <li class="nav-item"><a class="nav-link" href="/suppliers/">{% trans "Tedarikçiler" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'suppliers_list' %}">{% trans "Tedarikçiler" %}</a></li>
                 {% if tenant_is_owner %}
                   <li class="nav-item"><a class="nav-link" href="{% url 'ai_assistant:chat' %}"><i class="bi bi-robot"></i> {% trans "AI Asistan" %}</a></li>
                   <li class="nav-item dropdown">
@@ -71,9 +71,9 @@
                   <i class="bi bi-person-circle"></i> {{ request.user.username }}
                 </span>
               </li>
-              <li class="nav-item"><a class="nav-link btn btn-sm btn-outline-light" href="/accounts/logout/">{% trans "Çıkış" %}</a></li>
+              <li class="nav-item"><a class="nav-link btn btn-sm btn-outline-light" href="{% url 'logout' %}">{% trans "Çıkış" %}</a></li>
             {% else %}
-              <li class="nav-item"><a class="nav-link btn btn-sm btn-primary" href="/accounts/login/">{% trans "Giriş" %}</a></li>
+              <li class="nav-item"><a class="nav-link btn btn-sm btn-primary" href="{% url 'login' %}">{% trans "Giriş" %}</a></li>
             {% endif %}
           </ul>
         </div>
