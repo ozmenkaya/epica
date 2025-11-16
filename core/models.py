@@ -517,6 +517,42 @@ class QuoteComment(models.Model):
 		return f"Comment by {self.author_customer_id or 'anon'} on ticket {self.ticket_id}"
 
 
+class UserDashboardWidget(models.Model):
+	"""User customizable dashboard widgets"""
+	WIDGET_CHOICES = [
+		('daily_orders', 'Günlük Siparişler'),
+		('weekly_orders', 'Haftalık Siparişler'),
+		('monthly_orders', 'Aylık Siparişler'),
+		('delayed_orders', 'Geciken Siparişler'),
+		('month_comparison', 'Önceki Aya Göre Bu Ay'),
+		('pending_tickets', 'Bekleyen Talepler'),
+		('new_quotes', 'Yeni Teklifler'),
+		('top_suppliers', 'En İyi Tedarikçiler'),
+		('top_customers', 'En İyi Müşteriler'),
+		('recent_feedback', 'Son Değerlendirmeler'),
+		('order_status', 'Sipariş Durum Özeti'),
+		('revenue_chart', 'Gelir Grafiği'),
+	]
+	
+	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dashboard_widgets')
+	organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='dashboard_widgets')
+	widget_type = models.CharField(max_length=50, choices=WIDGET_CHOICES)
+	order = models.IntegerField(default=0)
+	is_visible = models.BooleanField(default=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+	
+	class Meta:
+		ordering = ['order', 'id']
+		unique_together = [['user', 'organization', 'widget_type']]
+		indexes = [
+			models.Index(fields=['user', 'organization', 'is_visible']),
+		]
+	
+	def __str__(self):
+		return f"{self.user.username} - {self.get_widget_type_display()}"
+
+
 # Import metrics models
 from .models_metrics import CustomerFeedback, OwnerReview, SupplierMetrics, CustomerMetrics
 
@@ -525,5 +561,5 @@ __all__ = [
 	'CategorySupplierRule', 'Ticket', 'TicketEmailReply', 'TicketAttachment',
 	'Quote', 'QuoteItem', 'OwnerQuoteAdjustment', 'QuoteComment',
 	'SupplierProduct', 'CustomerFeedback', 'OwnerReview', 
-	'SupplierMetrics', 'CustomerMetrics',
+	'SupplierMetrics', 'CustomerMetrics', 'UserDashboardWidget',
 ]

@@ -3,7 +3,7 @@ from accounts.permissions import tenant_member_required, tenant_role_required
 from django.conf import settings
 from accounts.models import Membership
 from .models import Customer, Supplier, Category, Ticket
-from .models import Customer, Supplier, Category, Ticket, TicketAttachment, Quote, SupplierProduct, QuoteItem, OwnerQuoteAdjustment, CategoryFormField, CategorySupplierRule
+from .models import Customer, Supplier, Category, Ticket, TicketAttachment, Quote, SupplierProduct, QuoteItem, OwnerQuoteAdjustment, CategoryFormField, CategorySupplierRule, UserDashboardWidget
 from django.db import models
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -32,24 +32,178 @@ def dashboard(request):
 	context = {"org": org}
 	
 	if org:
-		# En iyi performans gösteren tedarikçiler (Top 5)
+		from .models import UserDashboardWidget
 		from .models_metrics import SupplierMetrics, CustomerFeedback
-		top_suppliers = (
-			SupplierMetrics.objects
-			.filter(organization=org, overall_score__gt=0)
-			.select_related('supplier')
-			.order_by('-overall_score')[:5]
-		)
-		context['top_suppliers'] = top_suppliers
+		from billing.models import Order
+		from datetime import datetime, timedelta
+		from django.db.models import Count, Sum, Q
 		
-		# Son müşteri değerlendirmeleri (Recent 5)
-		recent_feedback = (
-			CustomerFeedback.objects
-			.filter(order__organization=org)
-			.select_related('order__supplier', 'order__ticket__customer')
-			.order_by('-created_at')[:5]
-		)
-		context['recent_feedback'] = recent_feedback
+		# Get user's widgets or create defaults for first-time users
+		user_widgets = UserDashboardWidget.objects.filter(
+			user=request.user,
+			organization=org,
+			is_visible=True
+		).order_by('order')
+		
+		# If no widgets exist, create defaults
+		if not user_widgets.exists():
+			default_widgets = [
+				('daily_orders', 0),
+				('weekly_orders', 1),
+				('delayed_orders', 2),
+				('month_comparison', 3),
+				('top_suppliers', 4),
+				('recent_feedback', 5),
+			]
+			for widget_type, order in default_widgets:
+				UserDashboardWidget.objects.create(
+					user=request.user,
+					organization=org,
+					widget_type=widget_type,
+					order=order
+				)
+			user_widgets = UserDashboardWidget.objects.filter(
+				user=request.user,
+				organization=org,
+				is_visible=True
+			).order_by('order')
+		
+		# Prepare widget data
+		widget_data = {}
+		today = datetime.now().date()
+		
+		for widget in user_widgets:
+			wtype = widget.widget_type
+			
+			if wtype == 'daily_orders':
+				count = Order.objects.filter(
+					organization=org,
+					created_at__date=today
+				).count()
+				widget_data['daily_orders'] = {'count': count}
+				
+			elif wtype == 'weekly_orders':
+				week_ago = today - timedelta(days=7)
+				count = Order.objects.filter(
+					organization=org,
+					created_at__date__gte=week_ago
+				).count()
+				widget_data['weekly_orders'] = {'count': count}
+				
+			elif wtype == 'monthly_orders':
+				month_ago = today - timedelta(days=30)
+				count = Order.objects.filter(
+					organization=org,
+					created_at__date__gte=month_ago
+				).count()
+				widget_data['monthly_orders'] = {'count': count}
+				
+			elif wtype == 'delayed_orders':
+				count = Order.objects.filter(
+					organization=org,
+					status=Order.Status.PROCESSING,
+					supplier_eta__lt=today
+				).count()
+				orders = Order.objects.filter(
+					organization=org,
+					status=Order.Status.PROCESSING,
+					supplier_eta__lt=today
+				).select_related('supplier', 'ticket')[:5]
+				widget_data['delayed_orders'] = {'count': count, 'orders': orders}
+				
+			elif wtype == 'month_comparison':
+				# This month
+				this_month_start = today.replace(day=1)
+				this_month_count = Order.objects.filter(
+					organization=org,
+					created_at__date__gte=this_month_start
+				).count()
+				
+				# Last month
+				if this_month_start.month == 1:
+					last_month_start = this_month_start.replace(year=this_month_start.year - 1, month=12)
+				else:
+					last_month_start = this_month_start.replace(month=this_month_start.month - 1)
+				
+				last_month_count = Order.objects.filter(
+					organization=org,
+					created_at__date__gte=last_month_start,
+					created_at__date__lt=this_month_start
+				).count()
+				
+				if last_month_count > 0:
+					change_percent = ((this_month_count - last_month_count) / last_month_count) * 100
+				else:
+					change_percent = 100 if this_month_count > 0 else 0
+					
+				widget_data['month_comparison'] = {
+					'this_month': this_month_count,
+					'last_month': last_month_count,
+					'change_percent': round(change_percent, 1)
+				}
+				
+			elif wtype == 'pending_tickets':
+				count = Ticket.objects.filter(
+					organization=org,
+					status__in=[Ticket.Status.OPEN, Ticket.Status.QUOTED]
+				).count()
+				tickets = Ticket.objects.filter(
+					organization=org,
+					status__in=[Ticket.Status.OPEN, Ticket.Status.QUOTED]
+				).select_related('customer', 'category')[:5]
+				widget_data['pending_tickets'] = {'count': count, 'tickets': tickets}
+				
+			elif wtype == 'new_quotes':
+				week_ago = today - timedelta(days=7)
+				count = Quote.objects.filter(
+					ticket__organization=org,
+					created_at__date__gte=week_ago
+				).count()
+				widget_data['new_quotes'] = {'count': count}
+				
+			elif wtype == 'top_suppliers':
+				suppliers = (
+					SupplierMetrics.objects
+					.filter(organization=org, overall_score__gt=0)
+					.select_related('supplier')
+					.order_by('-overall_score')[:5]
+				)
+				widget_data['top_suppliers'] = {'suppliers': suppliers}
+				
+			elif wtype == 'top_customers':
+				# Top customers by order count
+				from django.db.models import Count
+				customers = (
+					Customer.objects
+					.filter(organization=org)
+					.annotate(order_count=Count('tickets__order'))
+					.filter(order_count__gt=0)
+					.order_by('-order_count')[:5]
+				)
+				widget_data['top_customers'] = {'customers': customers}
+				
+			elif wtype == 'recent_feedback':
+				feedback = (
+					CustomerFeedback.objects
+					.filter(order__organization=org)
+					.select_related('order__supplier', 'order__ticket__customer')
+					.order_by('-created_at')[:5]
+				)
+				widget_data['recent_feedback'] = {'feedback': feedback}
+				
+			elif wtype == 'order_status':
+				status_counts = {}
+				for status_choice in Order.Status.choices:
+					status_code = status_choice[0]
+					count = Order.objects.filter(
+						organization=org,
+						status=status_code
+					).count()
+					status_counts[status_choice[1]] = count
+				widget_data['order_status'] = {'status_counts': status_counts}
+		
+		context['widgets'] = user_widgets
+		context['widget_data'] = widget_data
 	
 	return render(request, "core/dashboard.html", context)
 
@@ -3096,3 +3250,60 @@ def add_owner_review(request):
 	
 	messages.success(request, f"{created_count} kategori için değerlendirme başarıyla kaydedildi!")
 	return redirect(redirect_to)
+
+
+@tenant_member_required
+def dashboard_widgets_settings(request):
+	"""Dashboard widget configuration page"""
+	from django.http import JsonResponse
+	org = getattr(request, "tenant", None)
+	
+	if request.method == "POST":
+		# Handle AJAX save
+		if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+			import json
+			data = json.loads(request.body)
+			widgets_config = data.get('widgets', [])
+			
+			# Clear existing widgets
+			UserDashboardWidget.objects.filter(
+				user=request.user,
+				organization=org
+			).delete()
+			
+			# Create new widgets based on configuration
+			for config in widgets_config:
+				UserDashboardWidget.objects.create(
+					user=request.user,
+					organization=org,
+					widget_type=config['type'],
+					order=config['order'],
+					is_visible=config['visible']
+				)
+			
+			return JsonResponse({'success': True})
+	
+	# Get current widgets
+	current_widgets = UserDashboardWidget.objects.filter(
+		user=request.user,
+		organization=org
+	).order_by('order')
+	
+	# Get all available widget types
+	from .models import UserDashboardWidget as UDW
+	all_widget_types = [
+		{'value': choice[0], 'label': choice[1]} 
+		for choice in UDW.WIDGET_CHOICES
+	]
+	
+	# Mark currently selected widgets
+	selected_types = set(current_widgets.values_list('widget_type', flat=True))
+	
+	context = {
+		'org': org,
+		'current_widgets': current_widgets,
+		'all_widget_types': all_widget_types,
+		'selected_types': selected_types,
+	}
+	
+	return render(request, "core/dashboard_widgets_settings.html", context)

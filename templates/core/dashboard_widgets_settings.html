@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard Widget Ayarları" %} - Epica{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row mb-4">
+		<div class="col-12">
+			<div class="d-flex justify-content-between align-items-center">
+				<h2 class="mb-0">
+					<i class="bi bi-grid-3x3-gap"></i> {% trans "Dashboard Widget Ayarları" %}
+				</h2>
+				<a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+					<i class="bi bi-arrow-left"></i> {% trans "Dashboard'a Dön" %}
+				</a>
+			</div>
+			{% if org %}
+			<p class="text-muted">{{ org.name }}</p>
+			{% endif %}
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="card shadow-sm">
+				<div class="card-header bg-primary text-white">
+					<h5 class="mb-0"><i class="bi bi-list-check"></i> {% trans "Mevcut Widget'lar" %}</h5>
+				</div>
+				<div class="card-body">
+					<p class="text-muted small">{% trans "Sürükle-bırak ile sıralayın. Görünürlüğü değiştirmek için göz ikonuna tıklayın." %}</p>
+					
+					<ul id="current-widgets" class="list-group">
+						{% for widget in current_widgets %}
+						<li class="list-group-item d-flex justify-content-between align-items-center" 
+							data-widget-type="{{ widget.widget_type }}"
+							data-is-visible="{{ widget.is_visible|yesno:'true,false' }}"
+							style="cursor: move;">
+							<div class="d-flex align-items-center">
+								<i class="bi bi-grip-vertical text-muted me-2"></i>
+								<span class="widget-name">{{ widget.get_widget_type_display }}</span>
+							</div>
+							<div>
+								<button class="btn btn-sm btn-outline-secondary toggle-visibility" type="button">
+									<i class="bi {{ widget.is_visible|yesno:'bi-eye-fill,bi-eye-slash-fill' }}"></i>
+								</button>
+								<button class="btn btn-sm btn-outline-danger remove-widget" type="button">
+									<i class="bi bi-trash"></i>
+								</button>
+							</div>
+						</li>
+						{% empty %}
+						<li class="list-group-item text-muted text-center" id="empty-message">
+							{% trans "Henüz widget eklenmemiş. Sağdaki listeden ekleyin." %}
+						</li>
+						{% endfor %}
+					</ul>
+
+					<div class="mt-4">
+						<button id="save-widgets" class="btn btn-success">
+							<i class="bi bi-check-circle"></i> {% trans "Kaydet" %}
+						</button>
+						<button id="reset-defaults" class="btn btn-outline-warning ms-2">
+							<i class="bi bi-arrow-clockwise"></i> {% trans "Varsayılana Dön" %}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-6">
+			<div class="card shadow-sm">
+				<div class="card-header bg-success text-white">
+					<h5 class="mb-0"><i class="bi bi-plus-circle"></i> {% trans "Mevcut Olmayan Widget'lar" %}</h5>
+				</div>
+				<div class="card-body">
+					<p class="text-muted small">{% trans "Dashboard'a eklemek için widget'a tıklayın." %}</p>
+					
+					<ul id="available-widgets" class="list-group">
+						{% for widget_type in all_widget_types %}
+						{% if widget_type.value not in selected_types %}
+						<li class="list-group-item d-flex justify-content-between align-items-center available-widget" 
+							data-widget-type="{{ widget_type.value }}"
+							style="cursor: pointer;">
+							<span>{{ widget_type.label }}</span>
+							<i class="bi bi-plus-circle text-success"></i>
+						</li>
+						{% endif %}
+						{% endfor %}
+					</ul>
+					
+					{% if selected_types|length == all_widget_types|length %}
+					<div class="alert alert-info mt-3">
+						<i class="bi bi-info-circle"></i> {% trans "Tüm widget'lar eklendi!" %}
+					</div>
+					{% endif %}
+				</div>
+			</div>
+
+			<div class="card shadow-sm mt-3">
+				<div class="card-header bg-info text-white">
+					<h5 class="mb-0"><i class="bi bi-info-circle"></i> {% trans "Widget Açıklamaları" %}</h5>
+				</div>
+				<div class="card-body">
+					<ul class="small">
+						<li><strong>{% trans "Günlük Siparişler" %}:</strong> {% trans "Bugün oluşturulan sipariş sayısı" %}</li>
+						<li><strong>{% trans "Haftalık Siparişler" %}:</strong> {% trans "Son 7 gündeki sipariş sayısı" %}</li>
+						<li><strong>{% trans "Geciken Siparişler" %}:</strong> {% trans "Teslim tarihi geçmiş siparişler" %}</li>
+						<li><strong>{% trans "Önceki Aya Göre Bu Ay" %}:</strong> {% trans "Aylık sipariş karşılaştırması" %}</li>
+						<li><strong>{% trans "Bekleyen Talepler" %}:</strong> {% trans "Açık ve teklif verilmiş talepler" %}</li>
+						<li><strong>{% trans "Yeni Teklifler" %}:</strong> {% trans "Son 7 gündeki teklif sayısı" %}</li>
+						<li><strong>{% trans "En İyi Tedarikçiler" %}:</strong> {% trans "Performans skoruna göre ilk 5" %}</li>
+						<li><strong>{% trans "En İyi Müşteriler" %}:</strong> {% trans "Sipariş sayısına göre ilk 5" %}</li>
+						<li><strong>{% trans "Son Değerlendirmeler" %}:</strong> {% trans "En son müşteri geri bildirimleri" %}</li>
+						<li><strong>{% trans "Sipariş Durum Özeti" %}:</strong> {% trans "Durumlara göre sipariş dağılımı" %}</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.list-group-item.dragging {
+		opacity: 0.5;
+	}
+	
+	.list-group-item.drag-over {
+		border-top: 3px solid #007bff;
+	}
+	
+	.available-widget:hover {
+		background-color: #f8f9fa;
+	}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const currentList = document.getElementById('current-widgets');
+	const availableList = document.getElementById('available-widgets');
+	const saveBtn = document.getElementById('save-widgets');
+	const resetBtn = document.getElementById('reset-defaults');
+	let draggedElement = null;
+
+	// Drag and drop for reordering
+	currentList.addEventListener('dragstart', function(e) {
+		if (e.target.tagName === 'LI' && e.target.id !== 'empty-message') {
+			draggedElement = e.target;
+			e.target.classList.add('dragging');
+		}
+	});
+
+	currentList.addEventListener('dragend', function(e) {
+		if (e.target.tagName === 'LI') {
+			e.target.classList.remove('dragging');
+		}
+	});
+
+	currentList.addEventListener('dragover', function(e) {
+		e.preventDefault();
+		const afterElement = getDragAfterElement(currentList, e.clientY);
+		const dragging = document.querySelector('.dragging');
+		if (afterElement == null) {
+			currentList.appendChild(dragging);
+		} else {
+			currentList.insertBefore(dragging, afterElement);
+		}
+	});
+
+	function getDragAfterElement(container, y) {
+		const draggableElements = [...container.querySelectorAll('li:not(.dragging):not(#empty-message)')];
+		return draggableElements.reduce((closest, child) => {
+			const box = child.getBoundingClientRect();
+			const offset = y - box.top - box.height / 2;
+			if (offset < 0 && offset > closest.offset) {
+				return { offset: offset, element: child };
+			} else {
+				return closest;
+			}
+		}, { offset: Number.NEGATIVE_INFINITY }).element;
+	}
+
+	// Make items draggable
+	currentList.querySelectorAll('li').forEach(item => {
+		if (item.id !== 'empty-message') {
+			item.setAttribute('draggable', 'true');
+		}
+	});
+
+	// Toggle visibility
+	currentList.addEventListener('click', function(e) {
+		const btn = e.target.closest('.toggle-visibility');
+		if (btn) {
+			const li = btn.closest('li');
+			const icon = btn.querySelector('i');
+			const isVisible = li.dataset.isVisible === 'true';
+			
+			li.dataset.isVisible = !isVisible;
+			icon.className = !isVisible ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill';
+		}
+	});
+
+	// Remove widget
+	currentList.addEventListener('click', function(e) {
+		const btn = e.target.closest('.remove-widget');
+		if (btn) {
+			const li = btn.closest('li');
+			const widgetType = li.dataset.widgetType;
+			const widgetName = li.querySelector('.widget-name').textContent;
+			
+			// Move to available list
+			const newLi = document.createElement('li');
+			newLi.className = 'list-group-item d-flex justify-content-between align-items-center available-widget';
+			newLi.dataset.widgetType = widgetType;
+			newLi.style.cursor = 'pointer';
+			newLi.innerHTML = `
+				<span>${widgetName}</span>
+				<i class="bi bi-plus-circle text-success"></i>
+			`;
+			availableList.appendChild(newLi);
+			
+			li.remove();
+			
+			// Show empty message if no widgets
+			if (currentList.querySelectorAll('li:not(#empty-message)').length === 0) {
+				const emptyMsg = document.createElement('li');
+				emptyMsg.id = 'empty-message';
+				emptyMsg.className = 'list-group-item text-muted text-center';
+				emptyMsg.textContent = 'Henüz widget eklenmemiş. Sağdaki listeden ekleyin.';
+				currentList.appendChild(emptyMsg);
+			}
+		}
+	});
+
+	// Add widget from available list
+	availableList.addEventListener('click', function(e) {
+		const li = e.target.closest('.available-widget');
+		if (li) {
+			const widgetType = li.dataset.widgetType;
+			const widgetName = li.textContent.trim();
+			
+			// Remove empty message if exists
+			const emptyMsg = currentList.querySelector('#empty-message');
+			if (emptyMsg) emptyMsg.remove();
+			
+			// Add to current list
+			const newLi = document.createElement('li');
+			newLi.className = 'list-group-item d-flex justify-content-between align-items-center';
+			newLi.dataset.widgetType = widgetType;
+			newLi.dataset.isVisible = 'true';
+			newLi.style.cursor = 'move';
+			newLi.setAttribute('draggable', 'true');
+			newLi.innerHTML = `
+				<div class="d-flex align-items-center">
+					<i class="bi bi-grip-vertical text-muted me-2"></i>
+					<span class="widget-name">${widgetName}</span>
+				</div>
+				<div>
+					<button class="btn btn-sm btn-outline-secondary toggle-visibility" type="button">
+						<i class="bi bi-eye-fill"></i>
+					</button>
+					<button class="btn btn-sm btn-outline-danger remove-widget" type="button">
+						<i class="bi bi-trash"></i>
+					</button>
+				</div>
+			`;
+			currentList.appendChild(newLi);
+			li.remove();
+		}
+	});
+
+	// Save configuration
+	saveBtn.addEventListener('click', function() {
+		const widgets = [];
+		let order = 0;
+		
+		currentList.querySelectorAll('li:not(#empty-message)').forEach(li => {
+			widgets.push({
+				type: li.dataset.widgetType,
+				order: order++,
+				visible: li.dataset.isVisible === 'true'
+			});
+		});
+		
+		fetch(window.location.href, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': getCookie('csrftoken'),
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: JSON.stringify({ widgets: widgets })
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.success) {
+				alert('Widget ayarları kaydedildi!');
+				window.location.href = '{% url "dashboard" %}';
+			}
+		})
+		.catch(error => {
+			console.error('Error:', error);
+			alert('Kaydetme hatası!');
+		});
+	});
+
+	// Reset to defaults
+	resetBtn.addEventListener('click', function() {
+		if (confirm('Varsayılan widget ayarlarına dönmek istiyor musunuz?')) {
+			const defaultWidgets = [
+				{type: 'daily_orders', order: 0, visible: true},
+				{type: 'weekly_orders', order: 1, visible: true},
+				{type: 'delayed_orders', order: 2, visible: true},
+				{type: 'month_comparison', order: 3, visible: true},
+				{type: 'top_suppliers', order: 4, visible: true},
+				{type: 'recent_feedback', order: 5, visible: true}
+			];
+			
+			fetch(window.location.href, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': getCookie('csrftoken'),
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				body: JSON.stringify({ widgets: defaultWidgets })
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					alert('Varsayılan ayarlar yüklendi!');
+					window.location.reload();
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('Sıfırlama hatası!');
+			});
+		}
+	});
+
+	function getCookie(name) {
+		let cookieValue = null;
+		if (document.cookie && document.cookie !== '') {
+			const cookies = document.cookie.split(';');
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === (name + '=')) {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
+});
+</script>
+{% endblock %}
