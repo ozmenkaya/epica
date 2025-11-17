@@ -72,10 +72,9 @@ def org_switch(request, slug: str):
 def org_settings(request, pk: int):
 	org = get_object_or_404(Organization.objects.using('default'), pk=pk, memberships__user=request.user)
 	
-	# Check if user is owner or admin
-	membership = Membership.objects.using('default').filter(user=request.user, organization=org).first()
-	if not membership or membership.role not in [Membership.Role.OWNER, Membership.Role.ADMIN]:
-		messages.error(request, "Bu ayarlara erişim yetkiniz yok")
+	# Only owner can access
+	if org.owner != request.user:
+		messages.error(request, "Bu ayarlara erişim yetkiniz yok - Sadece organizasyon sahibi erişebilir")
 		return redirect("org_list")
 	
 	if request.method == "POST":
@@ -146,10 +145,14 @@ def org_delete(request, pk: int):
 def org_members(request, pk: int):
 	org = get_object_or_404(Organization.objects.using('default'), pk=pk, memberships__user=request.user)
 	
-	# Check if user is owner or admin
+	# Only owner can access
+	if org.owner != request.user:
+		messages.error(request, "Bu sayfaya erişim yetkiniz yok - Sadece organizasyon sahibi erişebilir")
+		return redirect("org_list")
+	
 	membership = Membership.objects.using('default').filter(user=request.user, organization=org).first()
-	if not membership or membership.role not in [Membership.Role.OWNER, Membership.Role.ADMIN]:
-		messages.error(request, "Bu sayfaya erişim yetkiniz yok")
+	if not membership:
+		messages.error(request, "Bu organizasyonun üyesi değilsiniz")
 		return redirect("org_list")
 	
 	members = Membership.objects.using('default').filter(organization=org).select_related('user').order_by('-created_at')
@@ -168,11 +171,10 @@ def org_member_add(request, pk: int):
 	
 	org = get_object_or_404(Organization.objects.using('default'), pk=pk, memberships__user=request.user)
 	
-	# Only owner or admin can add members
-	membership = Membership.objects.using('default').filter(user=request.user, organization=org).first()
-	if not membership or membership.role not in [Membership.Role.OWNER, Membership.Role.ADMIN]:
-		messages.error(request, "Kullanıcı ekleme yetkiniz yok")
-		return redirect("org_members", pk=pk)
+	# Only owner can add members
+	if org.owner != request.user:
+		messages.error(request, "Kullanıcı ekleme yetkiniz yok - Sadece organizasyon sahibi ekleyebilir")
+		return redirect("org_list")
 	
 	if request.method == "POST":
 		username_or_email = request.POST.get("username_or_email", "").strip()
@@ -276,16 +278,10 @@ def org_member_edit(request, pk: int, member_id: int):
 	org = get_object_or_404(Organization.objects.using('default'), pk=pk, memberships__user=request.user)
 	member = get_object_or_404(Membership.objects.using('default'), pk=member_id, organization=org)
 	
-	# Only owner or admin can edit members
-	user_membership = Membership.objects.using('default').filter(user=request.user, organization=org).first()
-	if not user_membership or user_membership.role not in [Membership.Role.OWNER, Membership.Role.ADMIN]:
-		messages.error(request, "Kullanıcı düzenleme yetkiniz yok")
-		return redirect("org_members", pk=pk)
-	
-	# Can't edit owner
-	if member.role == Membership.Role.OWNER and user_membership.role != Membership.Role.OWNER:
-		messages.error(request, "Sahip rolünü değiştiremezsiniz")
-		return redirect("org_members", pk=pk)
+	# Only owner can edit members
+	if org.owner != request.user:
+		messages.error(request, "Kullanıcı düzenleme yetkiniz yok - Sadece organizasyon sahibi düzenleyebilir")
+		return redirect("org_list")
 	
 	if request.method == "POST":
 		new_role = request.POST.get("role")
@@ -326,11 +322,10 @@ def org_member_delete(request, pk: int, member_id: int):
 	org = get_object_or_404(Organization.objects.using('default'), pk=pk, memberships__user=request.user)
 	member = get_object_or_404(Membership.objects.using('default'), pk=member_id, organization=org)
 	
-	# Only owner or admin can delete members
-	user_membership = Membership.objects.using('default').filter(user=request.user, organization=org).first()
-	if not user_membership or user_membership.role not in [Membership.Role.OWNER, Membership.Role.ADMIN]:
-		messages.error(request, "Kullanıcı silme yetkiniz yok")
-		return redirect("org_members", pk=pk)
+	# Only owner can delete members
+	if org.owner != request.user:
+		messages.error(request, "Kullanıcı silme yetkiniz yok - Sadece organizasyon sahibi silebilir")
+		return redirect("org_list")
 	
 	# Can't delete owner
 	if member.role == Membership.Role.OWNER:
