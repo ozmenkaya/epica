@@ -176,6 +176,7 @@ def org_member_add(request, pk: int):
 	
 	if request.method == "POST":
 		username_or_email = request.POST.get("username_or_email", "").strip()
+		email_input = request.POST.get("email", "").strip()
 		role = request.POST.get("role", Membership.Role.MEMBER)
 		create_if_not_exists = request.POST.get("create_if_not_exists") == "1"
 		
@@ -219,8 +220,15 @@ def org_member_add(request, pk: int):
 				return render(request, "accounts/org_member_add.html", {
 					"org": org,
 					"username_or_email": username_or_email,
+					"email": email_input,
 					"roles": Membership.Role.choices
 				})
+		
+		# Update email if provided and different
+		if email_input and user.email != email_input:
+			user.email = email_input
+			user.save()
+			messages.info(request, f"{user.username} kullanıcısının e-posta adresi güncellendi")
 		
 		# Check if already a member
 		if Membership.objects.filter(user=user, organization=org).exists():
