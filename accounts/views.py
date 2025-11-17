@@ -246,14 +246,28 @@ def org_member_add(request, pk: int):
 			messages.error(request, f"{user.username} zaten bu organizasyonun üyesi")
 			return redirect("org_members", pk=pk)
 		
+		# Get selected permissions
+		permissions_input = request.POST.getlist("permissions")
+		
 		# Create membership
-		Membership.objects.create(user=user, organization=org, role=role)
+		membership = Membership.objects.create(user=user, organization=org, role=role)
+		
+		# Set custom permissions if provided
+		if permissions_input:
+			membership.custom_permissions = {"allowed": permissions_input}
+			membership.save()
+		
 		messages.success(request, f"{user.username} organizasyona eklendi")
 		return redirect("org_members", pk=pk)
 	
+	from .permissions_config import PAGE_PERMISSIONS, ROLE_DEFAULT_PERMISSIONS
+	import json
+	
 	return render(request, "accounts/org_member_add.html", {
 		"org": org,
-		"roles": Membership.Role.choices
+		"roles": Membership.Role.choices,
+		"page_permissions": PAGE_PERMISSIONS,
+		"role_defaults": json.dumps(ROLE_DEFAULT_PERMISSIONS),
 	})
 
 
@@ -275,6 +289,7 @@ def org_member_edit(request, pk: int, member_id: int):
 	
 	if request.method == "POST":
 		new_role = request.POST.get("role")
+		permissions_input = request.POST.getlist("permissions")
 		
 		# Can't change owner role
 		if member.role == Membership.Role.OWNER:
@@ -282,14 +297,27 @@ def org_member_edit(request, pk: int, member_id: int):
 			return redirect("org_members", pk=pk)
 		
 		member.role = new_role
+		
+		# Update custom permissions
+		if permissions_input:
+			member.custom_permissions = {"allowed": permissions_input}
+		else:
+			member.custom_permissions = {}
+		
 		member.save()
-		messages.success(request, f"{member.user.username} rolü güncellendi")
+		messages.success(request, f"{member.user.username} rolü ve yetkileri güncellendi")
 		return redirect("org_members", pk=pk)
+	
+	from .permissions_config import PAGE_PERMISSIONS, ROLE_DEFAULT_PERMISSIONS
+	import json
 	
 	return render(request, "accounts/org_member_edit.html", {
 		"org": org,
 		"member": member,
-		"roles": Membership.Role.choices
+		"roles": Membership.Role.choices,
+		"page_permissions": PAGE_PERMISSIONS,
+		"role_defaults": json.dumps(ROLE_DEFAULT_PERMISSIONS),
+		"current_permissions": member.get_permissions(),
 	})
 
 

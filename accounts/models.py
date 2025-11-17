@@ -63,11 +63,33 @@ class Membership(models.Model):
 	role = models.CharField(max_length=20, choices=Role.choices, default=Role.MEMBER)
 	role_fk = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True, blank=True, related_name='memberships')
 	created_at = models.DateTimeField(auto_now_add=True)
+	
+	# Page-level permissions (stored as JSON)
+	custom_permissions = models.JSONField(default=dict, blank=True, help_text="Kullanıcıya özel sayfa yetkileri")
 
 	class Meta:
 		unique_together = ("user", "organization")
 
 	def __str__(self) -> str:
 		return f"{self.user} @ {self.organization} ({self.role})"
+	
+	def get_permissions(self):
+		"""Get all permissions for this membership (role-based + custom)"""
+		from .permissions_config import ROLE_DEFAULT_PERMISSIONS
+		
+		# Start with role-based permissions
+		base_perms = set(ROLE_DEFAULT_PERMISSIONS.get(self.role, []))
+		
+		# Add custom permissions
+		if self.custom_permissions:
+			base_perms.update(self.custom_permissions.get('allowed', []))
+			# Remove denied permissions
+			base_perms -= set(self.custom_permissions.get('denied', []))
+		
+		return list(base_perms)
+	
+	def has_permission(self, permission_key):
+		"""Check if this membership has a specific permission"""
+		return permission_key in self.get_permissions()
 
 # Create your models here.

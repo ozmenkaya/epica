@@ -23,13 +23,42 @@
           
           <div class="mb-3">
             <label for="role" class="form-label">{% trans "Rol" %}</label>
-            <select class="form-select" id="role" name="role" required>
+            <select class="form-select" id="role" name="role" required onchange="updatePermissionsByRole(this.value)">
               {% for value, label in roles %}
                 {% if value != "owner" %}
                   <option value="{{ value }}" {% if value == member.role %}selected{% endif %}>{{ label }}</option>
                 {% endif %}
               {% endfor %}
             </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">{% trans "Sayfa Yetkileri" %}</label>
+            <div class="card">
+              <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                <div class="row">
+                  {% for key, perm in page_permissions.items %}
+                  <div class="col-md-6 mb-2">
+                    <div class="form-check">
+                      <input class="form-check-input permission-checkbox" 
+                             type="checkbox" 
+                             name="permissions" 
+                             value="{{ key }}" 
+                             id="perm_{{ key }}"
+                             {% if key in current_permissions %}checked{% endif %}>
+                      <label class="form-check-label" for="perm_{{ key }}">
+                        <strong>{{ perm.name }}</strong>
+                        <br><small class="text-muted">{{ perm.description }}</small>
+                      </label>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="form-text">
+              <i class="bi bi-info-circle"></i> {% trans "Kullanıcının erişebileceği sayfaları seçin. Rol değiştirdiğinizde varsayılan yetkiler otomatik yüklenir." %}
+            </div>
           </div>
           
           <div class="d-flex gap-2">
@@ -45,4 +74,18 @@
     </div>
   </div>
 </div>
+
+<script>
+// Role-based default permissions
+const roleDefaults = {{ role_defaults|safe }};
+
+function updatePermissionsByRole(role) {
+  const checkboxes = document.querySelectorAll('.permission-checkbox');
+  const defaultPerms = roleDefaults[role] || [];
+  
+  checkboxes.forEach(cb => {
+    cb.checked = defaultPerms.includes(cb.value);
+  });
+}
+</script>
 {% endblock %}
