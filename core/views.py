@@ -226,7 +226,9 @@ def role_landing(request):
 	# 3) Supplier portal users
 	sup = getattr(request.user, "supplier_profile", None)
 	if sup is not None:
-		_set_tenant_session(request, org)
+		supplier_org = _get_supplier_org(sup, request)
+		if supplier_org:
+			_set_tenant_session(request, supplier_org)
 		return redirect("supplier_portal")
 
 	# 4) Organization members -> map using role to internal app pages
