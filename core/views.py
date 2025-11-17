@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from accounts.permissions import tenant_member_required, tenant_role_required
+from accounts.permissions import tenant_member_required, tenant_role_required, page_permission_required
 from django.conf import settings
 from accounts.models import Membership
 from .models import Customer, Supplier, Category, Ticket
@@ -26,7 +26,7 @@ def home(request):
 	return render(request, "core/home.html")
 
 
-@tenant_member_required
+@page_permission_required('dashboard')
 def dashboard(request):
 	org = getattr(request, "tenant", None)
 	context = {"org": org}
@@ -294,7 +294,9 @@ class CustomerForm(forms.ModelForm):
 		return cleaned
 
 
-@tenant_member_required
+from accounts.permissions import page_permission_required
+
+@page_permission_required('customers_list')
 def customers_list(request):
 	org = getattr(request, "tenant", None)
 	qs = Customer.objects.filter(organization=org)
@@ -308,7 +310,7 @@ def customers_list(request):
 	return render(request, "core/customers_list.html", {"customers": qs, "org": org, "q": q, "has_email": has_email})
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('customers_create')
 def customers_create(request):
 	org = getattr(request, "tenant", None)
 	if request.method == "POST":
@@ -486,7 +488,7 @@ class CategoryForm(forms.ModelForm):
 			self.fields["parent"].empty_label = "--- Ana Kategori ---"
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('categories_list')
 def categories_list(request):
 	org = getattr(request, "tenant", None)
 	# Get root categories (no parent) with all descendants
@@ -502,7 +504,7 @@ def categories_list(request):
 	return render(request, "core/categories_list.html", {"root_categories": root_categories, "org": org})
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('categories_manage')
 def categories_create(request):
 	org = getattr(request, "tenant", None)
 	if request.method == "POST":
@@ -527,7 +529,7 @@ def categories_create(request):
 	return render(request, "core/categories_form.html", {"form": form, "org": org})
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('categories_manage')
 def categories_edit(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Category, pk=pk, organization=org)
@@ -549,7 +551,7 @@ def categories_edit(request, pk: int):
 		form = CategoryForm(instance=obj, organization=org)
 	return render(request, "core/categories_form.html", {"form": form, "org": org})
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('categories_manage')
 def categories_delete(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Category, pk=pk, organization=org)
@@ -562,7 +564,7 @@ def categories_delete(request, pk: int):
 
 
 # ---------- Tickets overview for owner ----------
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('tickets_list')
 def tickets_list(request):
 	"""Owner view: show only requests that have no supplier quotes yet."""
 	org = getattr(request, "tenant", None)
@@ -576,7 +578,7 @@ def tickets_list(request):
 	return render(request, "core/tickets_list.html", {"tickets": qs, "org": org})
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('offers_list')
 def offers_list(request):
 	"""Owner view: tickets moved here once any supplier has submitted a quote."""
 	org = getattr(request, "tenant", None)
@@ -590,7 +592,7 @@ def offers_list(request):
 	return render(request, "core/offers_list.html", {"tickets": qs, "org": org})
 
 
-@tenant_member_required
+@page_permission_required('suppliers_list')
 def suppliers_list(request):
 	org = getattr(request, "tenant", None)
 	qs = Supplier.objects.filter(organizations=org)
@@ -624,7 +626,7 @@ def suppliers_list(request):
 	})
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('products_list')
 def owner_products_list(request):
 	"""Owner view: list all supplier products and which customers have ordered them."""
 	org = getattr(request, "tenant", None)
@@ -665,7 +667,7 @@ def owner_products_list(request):
 	)
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('products_manage')
 def owner_products_new(request):
 	org = getattr(request, "tenant", None)
 	if request.method == "POST":
@@ -681,7 +683,7 @@ def owner_products_new(request):
 	return render(request, "core/owner_products_form.html", {"form": form, "org": org})
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('suppliers_create')
 def suppliers_create(request):
 	org = getattr(request, "tenant", None)
 	existing_supplier = None
@@ -750,7 +752,7 @@ def suppliers_create(request):
 	return render(request, "core/suppliers_form.html", {"form": form, "org": org})
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('customers_edit')
 def customers_edit(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Customer, pk=pk, organization=org)
@@ -796,7 +798,7 @@ def customers_edit(request, pk: int):
 	return render(request, "core/customers_form.html", {"form": form, "org": org})
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('customers_delete')
 def customers_delete(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Customer, pk=pk, organization=org)
@@ -808,7 +810,7 @@ def customers_delete(request, pk: int):
 	return render(request, "core/customers_confirm_delete.html", {"obj": obj, "org": org})
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('suppliers_list')
 def supplier_detail(request, pk: int):
 	"""Tedarikçi detay sayfası - verilen işler, müşteriler, durumlar"""
 	org = getattr(request, "tenant", None)
@@ -1014,7 +1016,7 @@ def customer_detail(request, pk: int):
 	return render(request, "core/customer_detail.html", context)
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('suppliers_edit')
 def suppliers_edit(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Supplier, pk=pk, organizations=org)
@@ -1059,7 +1061,7 @@ def suppliers_edit(request, pk: int):
 	return render(request, "core/suppliers_form.html", {"form": form, "org": org})
 
 
-@tenant_role_required([Membership.Role.ADMIN, Membership.Role.OWNER])
+@page_permission_required('suppliers_delete')
 def suppliers_delete(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Supplier, pk=pk, organizations=org)
@@ -1781,7 +1783,7 @@ def customer_requests_new(request):
 	)
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('tickets_create')
 def tickets_new(request):
 	"""Owner creates a new request on behalf of a selected customer."""
 	org = getattr(request, "tenant", None)
@@ -2415,7 +2417,7 @@ def supplier_requests_detail(request, pk: int):
 
 
 # ---------- Owner: review quotes, select and set offer ----------
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('offers_list')
 def ticket_detail_owner(request, pk: int):
 	org = getattr(request, "tenant", None)
 	obj = get_object_or_404(Ticket.objects.select_related("customer", "category"), pk=pk, organization=org)
@@ -2661,7 +2663,7 @@ def supplier_products_delete(request, pk: int):
 
 
 # ---------- Owner: Orders list (runsayfası) ----------
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('orders_list')
 def orders_list(request):
 	org = getattr(request, "tenant", None)
 	qs = (
@@ -2679,7 +2681,7 @@ def orders_list(request):
 	return render(request, "core/orders_list.html", {"orders": qs, "org": org, "q": q})
 
 
-@tenant_role_required([Membership.Role.OWNER])
+@page_permission_required('orders_manage')
 def order_detail(request, pk: int):
 	org = getattr(request, "tenant", None)
 	order = get_object_or_404(

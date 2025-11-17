@@ -73,3 +73,44 @@ def tenant_role_required(roles: Iterable[str]):
         return _wrapped
 
     return decorator
+
+
+def page_permission_required(permission_key: str):
+    """
+    Decorator: Check if user has specific page permission.
+    Combines tenant membership check with page-level permission.
+    """
+    def decorator(view_func):
+        @login_required
+        @wraps(view_func)
+        def _wrapped(request: HttpRequest, *args, **kwargs):
+            from django.shortcuts import render
+            
+            guard = _portal_guard(request)
+            if guard is not None:
+                return guard
+            
+            org = getattr(request, "tenant", None)
+            if not org:
+                return redirect("org_list")
+            
+            mem = Membership.objects.filter(user=request.user, organization=org).first()
+            if not mem:
+                return render(request, "accounts/not_member.html", {
+                    "org": org,
+                    "user": request.user
+                }, status=403)
+            
+            # Check if user has the required permission
+            if not mem.has_permission(permission_key):
+                return render(request, "accounts/no_permission.html", {
+                    "org": org,
+                    "user": request.user,
+                    "required_permission": permission_key
+                }, status=403)
+            
+            return view_func(request, *args, **kwargs)
+        
+        return _wrapped
+    
+    return decorator
