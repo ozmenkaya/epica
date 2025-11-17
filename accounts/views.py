@@ -218,7 +218,8 @@ def org_member_add(request, pk: int):
 				messages.error(request, f"'{username_or_email}' kullanıcısı bulunamadı")
 				return render(request, "accounts/org_member_add.html", {
 					"org": org,
-					"username_or_email": username_or_email
+					"username_or_email": username_or_email,
+					"roles": Membership.Role.choices
 				})
 		
 		# Check if already a member
