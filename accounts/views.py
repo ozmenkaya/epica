@@ -64,15 +64,19 @@ def org_switch(request, slug: str):
 	if not org:
 		messages.error(request, "Bu organizasyona erişiminiz yok")
 		return redirect("org_list")
+	
+	# Update session to set the new organization
 	request.session["current_org"] = org.slug
 	
-	# Redirect to organization subdomain dashboard
+	# Build subdomain URL with full redirect to ensure session cookie is available
 	from django.http import HttpResponseRedirect
-	from django.urls import reverse
 	protocol = 'https' if request.is_secure() else 'http'
-	path = reverse('role_landing')  # Will redirect based on user's role in the org
-	subdomain_url = f"{protocol}://{org.slug}.epica.com.tr{path}"
-	return HttpResponseRedirect(subdomain_url)
+	subdomain_url = f"{protocol}://{org.slug}.epica.com.tr/tr/dashboard/"
+	
+	# Create response and ensure session is saved before redirect
+	response = HttpResponseRedirect(subdomain_url)
+	request.session.save()
+	return response
 
 
 @backoffice_only
