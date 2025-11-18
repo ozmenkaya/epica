@@ -33,6 +33,15 @@
           </div>
           
           <div class="mb-3">
+            <label for="new_password" class="form-label">{% trans "Yeni Şifre" %}</label>
+            <input type="password" class="form-control" id="new_password" name="new_password" 
+                   placeholder="{% trans 'Değiştirmek istemiyorsanız boş bırakın' %}">
+            <div class="form-text">
+              <i class="bi bi-info-circle"></i> {% trans "Şifreyi değiştirmek istiyorsanız yeni şifreyi girin. Boş bırakırsanız şifre değişmez." %}
+            </div>
+          </div>
+          
+          <div class="mb-3">
             <label class="form-label">{% trans "Sayfa Yetkileri" %}</label>
             <div class="card">
               <div class="card-body" style="max-height: 400px; overflow-y: auto;">

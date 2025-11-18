@@ -297,6 +297,7 @@ def org_member_edit(request, pk: int, member_id: int):
 	if request.method == "POST":
 		new_role = request.POST.get("role")
 		permissions_input = request.POST.getlist("permissions")
+		new_password = request.POST.get("new_password", "").strip()
 		
 		# Can't change owner role
 		if member.role == Membership.Role.OWNER:
@@ -312,7 +313,15 @@ def org_member_edit(request, pk: int, member_id: int):
 			member.custom_permissions = {}
 		
 		member.save(using='default')
-		messages.success(request, f"{member.user.username} rolü ve yetkileri güncellendi")
+		
+		# Update password if provided
+		if new_password:
+			member.user.set_password(new_password)
+			member.user.save(using='default')
+			messages.success(request, f"{member.user.username} rolü, yetkileri ve şifresi güncellendi")
+		else:
+			messages.success(request, f"{member.user.username} rolü ve yetkileri güncellendi")
+		
 		return redirect("org_members", pk=pk)
 	
 	from .permissions_config import PAGE_PERMISSIONS, ROLE_DEFAULT_PERMISSIONS
