@@ -12,9 +12,26 @@ def login_view(request):
 		form = AuthenticationForm(request, data=request.POST)
 		if form.is_valid():
 			user = form.get_user()
+			
+			# If logging in from a subdomain, verify user is member of that organization
+			tenant = getattr(request, "tenant", None)
+			if tenant:
+				# Check if user is a member of this organization
+				is_member = Membership.objects.using('default').filter(
+					user=user, 
+					organization=tenant
+				).exists()
+				
+				if not is_member:
+					messages.error(request, f"Bu organizasyona erişim yetkiniz yok: {tenant.name}")
+					return render(request, "accounts/login.html", {"form": form})
+				
+				# Set the tenant in session for successful login
+				request.session["current_org"] = tenant.slug
+			
 			login(request, user)
 			return redirect("portal_home")
-		messages.error(request, "Giriş başarısız")
+		messages.error(request, "Kullanıcı adı veya şifre hatalı")
 	else:
 		form = AuthenticationForm(request)
 	return render(request, "accounts/login.html", {"form": form})
