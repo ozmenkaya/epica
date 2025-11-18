@@ -66,10 +66,12 @@ def org_switch(request, slug: str):
 		return redirect("org_list")
 	request.session["current_org"] = org.slug
 	
-	# Redirect to organization subdomain
+	# Redirect to organization subdomain dashboard
 	from django.http import HttpResponseRedirect
+	from django.urls import reverse
 	protocol = 'https' if request.is_secure() else 'http'
-	subdomain_url = f"{protocol}://{org.slug}.epica.com.tr/tr/portal/"
+	path = reverse('role_landing')  # Will redirect based on user's role in the org
+	subdomain_url = f"{protocol}://{org.slug}.epica.com.tr{path}"
 	return HttpResponseRedirect(subdomain_url)
 
 
