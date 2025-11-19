@@ -57,7 +57,7 @@ def dashboard(request):
 			]
 			for widget_type, order in default_widgets:
 				UserDashboardWidget.objects.create(
-					user=request.user,
+					user_id=request.user.id,
 					organization=org,
 					widget_type=widget_type,
 					order=order
