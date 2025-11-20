@@ -70,15 +70,22 @@ def chat_view(request):
     
     if request.method == "POST":
         # Create new conversation
-        conversation = Conversation.objects.create(
-            organization=organization,
-            user_id=request.user.id,
-            title="New Chat"
-        )
-        return JsonResponse({
-            'success': True,
-            'conversation_id': conversation.id
-        })
+        try:
+            conversation = Conversation.objects.create(
+                organization=organization,
+                user_id=request.user.id,
+                title="New Chat"
+            )
+            return JsonResponse({
+                'success': True,
+                'conversation_id': conversation.id
+            })
+        except Exception as e:
+            logger.error(f"Error creating conversation: {e}", exc_info=True)
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
     
     # GET: Show chat interface
     conversations = Conversation.objects.filter(
