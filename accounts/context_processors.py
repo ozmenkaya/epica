@@ -1,6 +1,6 @@
 from typing import Optional
 from django.http import HttpRequest
-from accounts.models import Membership
+from accounts.models import Membership, Organization
 
 
 def tenant(request: HttpRequest):
@@ -12,7 +12,18 @@ def tenant(request: HttpRequest):
       - tenant_is_owner/admin/member: bool
       - tenant_role_key: optional custom role key (from Membership.role_fk)
     """
+    # First try to get org from request (set by TenantMiddleware from subdomain)
     org = getattr(request, "tenant", None)
+    
+    # If not from subdomain, try to get from session
+    if org is None:
+        current_org_slug = request.session.get("current_org")
+        if current_org_slug:
+            org = Organization.objects.using('default').filter(slug=current_org_slug).first()
+            # Set it on request for consistency
+            if org:
+                request.tenant = org
+    
     mem: Optional[Membership] = None
     is_owner = is_admin = is_member = False
     role_key = None

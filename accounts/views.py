@@ -30,6 +30,17 @@ def login_view(request):
 				request.session["current_org"] = tenant.slug
 			
 			login(request, user)
+			
+			# Check for ?next= parameter first
+			next_url = request.GET.get("next") or request.POST.get("next")
+			if next_url:
+				return redirect(next_url)
+			
+			# If on a subdomain, redirect to dashboard directly (stay on subdomain)
+			if tenant:
+				return redirect("dashboard")
+			
+			# Otherwise use default portal flow
 			return redirect("portal_home")
 		messages.error(request, "Kullanıcı adı veya şifre hatalı")
 	else:

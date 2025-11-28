@@ -13,6 +13,22 @@ def _portal_guard(request: HttpRequest) -> Optional[HttpResponse]:
     return None
 
 
+def _get_tenant_from_request_or_session(request: HttpRequest) -> Optional[Organization]:
+    """Get tenant from request (subdomain) or session."""
+    org = getattr(request, "tenant", None)
+    if org:
+        return org
+    
+    # Fallback to session
+    current_org_slug = request.session.get("current_org")
+    if current_org_slug:
+        org = Organization.objects.using('default').filter(slug=current_org_slug).first()
+        if org:
+            # Also set it on request for consistency
+            request.tenant = org
+    return org
+
+
 def backoffice_only(view_func: Callable[..., HttpResponse]):
     """Decorator: allow only non-portal users into a view (still requires login)."""
     @login_required
@@ -34,7 +50,7 @@ def tenant_member_required(view_func):
         guard = _portal_guard(request)
         if guard is not None:
             return guard
-        org = getattr(request, "tenant", None)
+        org = _get_tenant_from_request_or_session(request)
         if not org:
             return redirect("org_list")
         if not Membership.objects.using('default').filter(user=request.user, organization=org).exists():
@@ -56,7 +72,7 @@ def tenant_role_required(roles: Iterable[str]):
             guard = _portal_guard(request)
             if guard is not None:
                 return guard
-            org = getattr(request, "tenant", None)
+            org = _get_tenant_from_request_or_session(request)
             if not org:
                 return redirect("org_list")
             mem = Membership.objects.using('default').filter(user=request.user, organization=org).first()
@@ -90,7 +106,7 @@ def page_permission_required(permission_key: str):
             if guard is not None:
                 return guard
             
-            org = getattr(request, "tenant", None)
+            org = _get_tenant_from_request_or_session(request)
             if not org:
                 return redirect("org_list")
             

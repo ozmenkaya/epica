@@ -241,9 +241,16 @@ def role_landing(request):
 		return redirect("supplier_portal")
 
 	# 4) Organization members -> map using role to internal app pages
-	# Ensure we have a current org in session; if missing and the user has exactly
-	# one membership, pick it automatically; otherwise ask user to choose.
+	# Check if org is available from request.tenant (set by middleware from subdomain)
+	# or from session
 	org = getattr(request, "tenant", None)
+	current_org_slug = request.session.get("current_org")
+	
+	# If no tenant from subdomain, try to get from session
+	if org is None and current_org_slug:
+		org = Organization.objects.using('default').filter(slug=current_org_slug).first()
+	
+	# If still no org, check user's memberships
 	if org is None:
 		user_orgs = (
 			Membership.objects.using('default').filter(user=request.user)
@@ -253,11 +260,11 @@ def role_landing(request):
 		user_orgs = list(user_orgs)
 		if len(user_orgs) == 1:
 			request.session["current_org"] = user_orgs[0]
-			org = getattr(request, "tenant", None)  # middleware will set on next request
+			org = Organization.objects.using('default').filter(slug=user_orgs[0]).first()
 		else:
 			return redirect("org_list")
 
-	mem = Membership.objects.using('default').filter(user=request.user, organization__slug=request.session.get("current_org")).select_related("role_fk").first()
+	mem = Membership.objects.using('default').filter(user=request.user, organization=org).select_related("role_fk").first()
 	if not mem:
 		return redirect("org_list")
 
