@@ -13,16 +13,28 @@ def login_view(request):
 		if form.is_valid():
 			user = form.get_user()
 			
-			# If logging in from a subdomain, verify user is member of that organization
+			# If logging in from a subdomain, verify user has access to that organization
 			tenant = getattr(request, "tenant", None)
 			if tenant:
-				# Check if user is a member of this organization
+				# Check access: member OR customer OR supplier of this organization
 				is_member = Membership.objects.using('default').filter(
 					user=user, 
 					organization=tenant
 				).exists()
 				
-				if not is_member:
+				# Check if user is a customer of this organization
+				is_customer = False
+				cust = getattr(user, 'customer_profile', None)
+				if cust and cust.organization_id == tenant.id:
+					is_customer = True
+				
+				# Check if user is a supplier linked to this organization
+				is_supplier = False
+				sup = getattr(user, 'supplier_profile', None)
+				if sup and sup.organizations.filter(id=tenant.id).exists():
+					is_supplier = True
+				
+				if not (is_member or is_customer or is_supplier):
 					messages.error(request, f"Bu organizasyona erişim yetkiniz yok: {tenant.name}")
 					return render(request, "accounts/login.html", {"form": form})
 				
@@ -35,6 +47,16 @@ def login_view(request):
 			next_url = request.GET.get("next") or request.POST.get("next")
 			if next_url:
 				return redirect(next_url)
+			
+			# If user is a customer, go to customer portal
+			cust = getattr(user, 'customer_profile', None)
+			if cust:
+				return redirect("customer_portal")
+			
+			# If user is a supplier, go to supplier portal
+			sup = getattr(user, 'supplier_profile', None)
+			if sup:
+				return redirect("supplier_portal")
 			
 			# If on a subdomain, redirect to dashboard directly (stay on subdomain)
 			if tenant:
