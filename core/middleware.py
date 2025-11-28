@@ -13,12 +13,17 @@ class TenantMiddleware(MiddlewareMixin):
     1. Subdomain (helmex.epica.com.tr → 'helmex')
     2. Query parameter (?org=helmex)
     3. Session (stored from previous request)
+    
+    Also sets request.is_subdomain_request to indicate if request came from a subdomain.
     """
 
     def process_request(self, request: HttpRequest):
         # Extract subdomain from host
         host = request.get_host().split(':')[0]  # Remove port if present
         subdomain = self._extract_subdomain(host)
+        
+        # Track if this is a subdomain request (important for login validation)
+        request.is_subdomain_request = subdomain is not None
         
         # Priority: subdomain > query param > session
         slug = subdomain or request.GET.get("org") or request.session.get("current_org")

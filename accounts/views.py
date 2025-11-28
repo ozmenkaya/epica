@@ -13,9 +13,11 @@ def login_view(request):
 		if form.is_valid():
 			user = form.get_user()
 			
-			# If logging in from a subdomain, verify user has access to that organization
+			# Only validate tenant access if logging in from a subdomain (not main domain)
+			is_subdomain = getattr(request, "is_subdomain_request", False)
 			tenant = getattr(request, "tenant", None)
-			if tenant:
+			
+			if is_subdomain and tenant:
 				# Check access: member OR customer OR supplier of this organization
 				is_member = Membership.objects.using('default').filter(
 					user=user, 
@@ -59,7 +61,7 @@ def login_view(request):
 				return redirect("supplier_portal")
 			
 			# If on a subdomain, redirect to dashboard directly (stay on subdomain)
-			if tenant:
+			if is_subdomain and tenant:
 				return redirect("dashboard")
 			
 			# Otherwise use default portal flow
