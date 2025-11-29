@@ -185,14 +185,12 @@ LANGUAGE_COOKIE_SECURE = not DEBUG  # Secure in production
 LANGUAGE_COOKIE_HTTPONLY = False
 LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
-# Session cookie settings (for subdomain sharing)
-SESSION_COOKIE_DOMAIN = '.epica.com.tr' if not DEBUG else None
+# Session cookie settings
 SESSION_COOKIE_SECURE = not DEBUG  # Only send over HTTPS in production
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-# CSRF cookie settings (for subdomain sharing)
-CSRF_COOKIE_DOMAIN = '.epica.com.tr' if not DEBUG else None
+# CSRF cookie settings
 CSRF_COOKIE_SECURE = not DEBUG  # Only send over HTTPS in production
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'

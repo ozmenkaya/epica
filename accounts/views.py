@@ -12,37 +12,6 @@ def login_view(request):
 		form = AuthenticationForm(request, data=request.POST)
 		if form.is_valid():
 			user = form.get_user()
-			
-			# Only validate tenant access if logging in from a subdomain (not main domain)
-			is_subdomain = getattr(request, "is_subdomain_request", False)
-			tenant = getattr(request, "tenant", None)
-			
-			if is_subdomain and tenant:
-				# Check access: member OR customer OR supplier of this organization
-				is_member = Membership.objects.using('default').filter(
-					user=user, 
-					organization=tenant
-				).exists()
-				
-				# Check if user is a customer of this organization
-				is_customer = False
-				cust = getattr(user, 'customer_profile', None)
-				if cust and cust.organization_id == tenant.id:
-					is_customer = True
-				
-				# Check if user is a supplier linked to this organization
-				is_supplier = False
-				sup = getattr(user, 'supplier_profile', None)
-				if sup and sup.organizations.filter(id=tenant.id).exists():
-					is_supplier = True
-				
-				if not (is_member or is_customer or is_supplier):
-					messages.error(request, f"Bu organizasyona erişim yetkiniz yok: {tenant.name}")
-					return render(request, "accounts/login.html", {"form": form})
-				
-				# Set the tenant in session for successful login
-				request.session["current_org"] = tenant.slug
-			
 			login(request, user)
 			
 			# Check for ?next= parameter first
@@ -59,10 +28,6 @@ def login_view(request):
 			sup = getattr(user, 'supplier_profile', None)
 			if sup:
 				return redirect("supplier_portal")
-			
-			# If on a subdomain, redirect to dashboard directly (stay on subdomain)
-			if is_subdomain and tenant:
-				return redirect("dashboard")
 			
 			# Otherwise use default portal flow
 			return redirect("portal_home")
@@ -119,16 +84,8 @@ def org_switch(request, slug: str):
 	
 	# Update session to set the new organization
 	request.session["current_org"] = org.slug
-	
-	# Build subdomain URL with full redirect to ensure session cookie is available
-	from django.http import HttpResponseRedirect
-	protocol = 'https' if request.is_secure() else 'http'
-	subdomain_url = f"{protocol}://{org.slug}.epica.com.tr/tr/dashboard/"
-	
-	# Create response and ensure session is saved before redirect
-	response = HttpResponseRedirect(subdomain_url)
-	request.session.save()
-	return response
+	messages.success(request, f"{org.name} organizasyonuna geçildi")
+	return redirect("dashboard")
 
 
 @backoffice_only
