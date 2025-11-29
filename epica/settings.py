@@ -197,6 +197,16 @@ CSRF_COOKIE_SECURE = not DEBUG  # Only send over HTTPS in production
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+    SECURE_HSTS_SECONDS = 31536000  # 1 year - enable HSTS
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS to all subdomains
+    SECURE_HSTS_PRELOAD = True  # Allow preloading in browser HSTS lists
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust nginx proxy
+    SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
+    SECURE_BROWSER_XSS_FILTER = True  # Enable XSS filter
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
