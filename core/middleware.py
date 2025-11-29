@@ -2,6 +2,9 @@ from typing import Optional
 from django.http import HttpRequest
 from django.utils.deprecation import MiddlewareMixin
 from accounts.models import Organization, Membership
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TenantMiddleware(MiddlewareMixin):
@@ -15,6 +18,13 @@ class TenantMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request: HttpRequest):
+        # Debug: log session info for authenticated users
+        user = getattr(request, 'user', None)
+        if user and getattr(user, 'is_authenticated', False):
+            session_key = request.session.session_key
+            current_org = request.session.get("current_org")
+            logger.info(f"TenantMiddleware - User: {user.username}, Session: {session_key}, CurrentOrg: {current_org}, Path: {request.path}")
+        
         # Priority: query param > session
         slug = request.GET.get("org") or request.session.get("current_org")
         
