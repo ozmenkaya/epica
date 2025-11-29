@@ -1176,18 +1176,16 @@ def supplier_portal(request):
 	
 	if org:
 		_set_tenant_session(request, org)
-	# Count tickets assigned to this supplier - optimized with prefetch
-	open_tickets = (
-		Ticket.objects
-		.filter(organization=org, status=Ticket.Status.OPEN)
-		.select_related("category")
-		.prefetch_related("assigned_suppliers")
-	) if org else []
 	
-	assigned_cnt = sum(
-		1 for t in open_tickets 
-		if sup.id in [s.id for s in t.assigned_suppliers.all()]
-	)
+	# Count tickets assigned to this supplier
+	# Note: assigned_suppliers is a property (not a DB field), so we can't use prefetch_related
+	assigned_cnt = 0
+	if org:
+		open_tickets = Ticket.objects.filter(organization=org, status=Ticket.Status.OPEN).select_related("category")
+		for t in open_tickets:
+			if sup.id in [s.id for s in t.assigned_suppliers]:
+				assigned_cnt += 1
+	
 	return render(request, "core/portal_supplier.html", {"supplier": sup, "org": org, "assigned_open_count": assigned_cnt})
 
 
@@ -1200,18 +1198,16 @@ def supplier_requests_list(request):
 	org = getattr(request, "tenant", None) or sup.organizations.first()
 	if org:
 		_set_tenant_session(request, org)
-	# Rule-based assignment: optimized with prefetch instead of N+1 queries
-	all_tickets = (
-		Ticket.objects
-		.filter(organization=org)
-		.select_related("category", "customer")
-		.prefetch_related("assigned_suppliers")
-	) if org else []
 	
-	tickets = [
-		t for t in all_tickets 
-		if sup.id in [s.id for s in t.assigned_suppliers.all()]
-	]
+	# Rule-based assignment
+	# Note: assigned_suppliers is a property (not a DB field), so we can't use prefetch_related
+	tickets = []
+	if org:
+		all_tickets = Ticket.objects.filter(organization=org).select_related("category", "customer")
+		for t in all_tickets:
+			if sup.id in [s.id for s in t.assigned_suppliers]:
+				tickets.append(t)
+	
 	return render(request, "core/portal_supplier_requests_list.html", {"tickets": tickets, "supplier": sup, "org": org})
 
 
